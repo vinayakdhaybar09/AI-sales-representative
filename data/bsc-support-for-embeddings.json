@@ -1,0 +1,416 @@
+{
+  "faqs": [
+    {
+      "question": "Where is my order? (Tracking & Delays)",
+      "answer": "You can easily track your order by following the steps below:\n\nVisit our Contact Us page:\n\nhttps://www.bombayshavingcompany.com/pages/contact-us\n\nand click on \"Track Order\" — or directly use this link:\n\nhttps://api.gokwik.co/kwikship/track?merchant_id=3mt5u7n3w2kzqual96\n\nEnter your order number to view the latest status.",
+      "category": "Orders / Shipping"
+    },
+    {
+      "question": "The status of my order is not updating since past few days",
+      "answer": "Orders are usually dispatched within 24–48 hours. You can check the latest status by clicking on \"Track Order\" on this page:\n\nhttps://api.gokwik.co/kwikship/track?merchant_id=3mt5u7n3w2kzqual96\n\nYou will also receive SMS, Email, and WhatsApp notifications once your order is shipped.\n\nIf the status still appears unchanged, please reach out to:\n\ncare@bombayshavingcompany.com\n\nNote: Delivery typically takes 3–4 days after shipping. If delayed or marked delivered but not received, contact support within 48 business hours. Orders from 18-hour sales may take longer to dispatch.",
+      "category": "Orders / Shipping"
+    },
+    {
+      "question": "How do I cancel my order?",
+      "answer": "You can cancel your order only if it has not yet been packed or shipped.\n\nIf already packed or shipped, cancellation is not possible — however you may refuse delivery, and prepaid refunds will be processed to the original payment method within 5–7 working days.\n\nTo raise a cancellation request, email:\n\ncare@bombayshavingcompany.com\n\nNote: COD order shipping charges are non-refundable.",
+      "category": "Cancellations"
+    },
+    {
+      "question": "Why was my order cancelled?",
+      "answer": "Your order may have been cancelled due to a breach of our Order & Product Limit Terms and Conditions, or a temporary technical issue during processing.\n\nReview our T&Cs at:\n\nhttps://www.bombayshavingcompany.com/pages/terms-and-conditions\n\nFor further assistance contact:\n\ncare@bombayshavingcompany.com",
+      "category": "Orders / Cancellations"
+    },
+    {
+      "question": "How can I modify my order (phone number, address, or product)?",
+      "answer": "We are unable to make changes once an order has been packed.\n\nIf not yet packed, contact our team and we'll do the needful. Otherwise, cancel and place a new order with the correct details.\n\nIf already packed, cancellation is not possible, you may refuse delivery, and prepaid refunds will be processed within 5–7 working days.",
+      "category": "Orders"
+    },
+    {
+      "question": "My order has been cancelled. When will I receive my refund?",
+      "answer": "For prepaid orders, refunds are initiated immediately upon cancellation, return approval, or a failed order.\n\nThe refund typically reflects in your source account within 2–3 working days (excluding Saturdays, Sundays, and national holidays).",
+      "category": "Refunds"
+    },
+    {
+      "question": "I have not received my refund. What should I do?",
+      "answer": "If it has been 5–7 working days since the refund was initiated, please check your bank or payment source statement.\n\nIf you still don’t see the amount, contact:\n\ncare@bombayshavingcompany.com",
+      "category": "Refunds"
+    },
+    {
+      "question": "Why have I received only part of my order (missing products)?",
+      "answer": "Your order may have been shipped in multiple packages arriving separately.\n\nTrack all shipments at:\n\nhttps://api.gokwik.co/kwikship/track?merchant_id=3mt5u7n3w2kzqual96\n\nor via the Track Order section in your account.\n\nIf you cannot view separate tracking links, email:\n\ncare@bombayshavingcompany.com",
+      "category": "Orders / Shipping"
+    },
+    {
+      "question": "I've received a defective / damaged / expired / wrong product. What should I do?",
+      "answer": "Please raise a request through our Returns and Exchange page at:\n\nhttps://www.bombayshavingcompany.com/apps/return_prime\n\nShare:\n\n- Clear images of the delivered items.\n- Photos of the outer shipping box with the shipping label visible\n\nThe request must be raised within 2 working days and our team will assist with next steps.",
+      "category": "Returns / Replacements"
+    },
+    {
+      "question": "The delivery executive behaved inappropriately with me.",
+      "answer": "We take such concerns extremely seriously.\n\nPlease reach out to:\n\ncare@bombayshavingcompany.com\n\nwith the incident details. Our team will escalate immediately and work with the delivery partner to take strict action.\n\nIf you feel unsafe, please also contact your local authorities.",
+      "category": "Delivery / Support"
+    },
+    {
+      "question": "I have been charged an extra amount during checkout. Why?",
+      "answer": "Additional charges may include Cash on Delivery fees or shipping charges.\n\nNote:\n\n- Orders below ₹299 incur a ₹99 shipping fee.\n- COD orders incur an additional ₹80 non-refundable COD fee.",
+      "category": "Payments / Shipping"
+    },
+    {
+      "question": "Can I modify / change my payment method?",
+      "answer": "You cannot change the payment method once an order is placed.\n\nIf not yet packed or shipped, you may cancel and place a new order with your preferred payment method.\n\nPrepaid refunds are processed to the source account within 2–3 working days.",
+      "category": "Payments"
+    },
+    {
+      "question": "My order was returned without a delivery attempt / A fake delivery attempt was marked.",
+      "answer": "Our courier partners typically attempt delivery up to 3 times before returning the order.\n\nCheck your SMS/Email notifications for courier updates, or view detailed tracking by clicking \"Track Order\" on your order details page.",
+      "category": "Delivery / Orders"
+    },
+    {
+      "question": "Refund (for returned orders)",
+      "answer": "If your prepaid order has been marked as Returned by the courier, the refund will be initiated to your original payment method once we receive the returned product(s) at our warehouse.\n\nRefunds are credited within 2–3 working days from the date of processing (excluding Saturdays, Sundays, and national holidays).",
+      "category": "Refunds / Returns"
+    },
+    {
+      "question": "My payment has been deducted, but my order is not confirmed.",
+      "answer": "This may be due to a temporary technical error.\n\nCheck your email inbox (including spam/junk) for an order confirmation.\n\nIf payment was deducted but the order was not confirmed, the amount will be automatically refunded to your source account within 48 hours.",
+      "category": "Payments / Orders"
+    },
+    {
+      "question": "Can I charge it with any type c cable?",
+      "answer": "Only A to C supported",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Can I use fast chargers (like 15W or 30W phone chargers)?",
+      "answer": "Not Recommend",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Can the trimmer be used while plugged in?",
+      "answer": "Yes, But prefer to use without cord",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Can I get clean shave trim with trimmer?",
+      "answer": "The trimmers are designed to give you a close trim of 0.5 mm. It does not provide a complete zero shave.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How do I prevent overheating during trimming?",
+      "answer": "To prevent overheating, keep the trimmer fully charged, clean and oil the blades regularly, avoid pressing too hard, and give it a short break every 3–4 minutes of continuous use.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Are accessories not covered under warranty?",
+      "answer": "Accessories like combs, attachments, and charging cables aren’t covered under warranty. The warranty applies only to the main trimmer unit, as accessories are consumable parts that may wear out with use.",
+      "category": "Warranty / Trimmer FAQs"
+    },
+    {
+      "question": "Which oil should I use for blades?",
+      "answer": "Hi, we recommend using clipper or trimmer blade oil for the blades, as it is specially formulated to reduce friction, prevent rust, and keep performance smooth.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How to avoid rusting?",
+      "answer": "To avoid rusting, always wipe the blades thoroughly, ensure they’re completely dry, and store the trimmer in a cool, dry place. Rust usually occurs when moisture remains on the metal parts inside, so proper drying and safe storage are the best prevention.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How long does the trimmer battery last on a full charge ?",
+      "answer": "The trimmer offers up to 90 minutes of runtime on a full charge, making it ideal for multiple grooming sessions.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "What's The Run time?",
+      "answer": "90 minutes",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "What charging port is there in trimmer?",
+      "answer": "Type C",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "I'm not able to charge 100%",
+      "answer": "Due to a technical limitation, the charging display may show 99% even when fully charged to 100%. This is only a display issue and doesn’t affect charging or performance. We’re working to resolve it in future models.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How much time does it take to fully charge the trimmer ?",
+      "answer": "The Full Body Trimmer takes approximately 1.5 to 2 hours for a complete charge.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Does the Full Body Trimmer come with a warranty ?",
+      "answer": "Yes, the trimmer comes with a 2-year manufacturer warranty.",
+      "category": "Warranty / Trimmer FAQs"
+    },
+    {
+      "question": "How can I claim warranty support ?",
+      "answer": "You can contact Bombay Shaving Company Support with your order details and product information for warranty assistance.",
+      "category": "Warranty"
+    },
+    {
+      "question": "What does the warranty cover ?",
+      "answer": "The warranty generally covers manufacturing defects and functional issues under normal usage conditions.",
+      "category": "Warranty"
+    },
+    {
+      "question": "Does your trimmer is waterproof can i take it in shower?",
+      "answer": "This trimmer is IPX6 rated, meaning it is highly water‑resistant and can withstand powerful water sprays. You can rinse the head under running water after removing it, but avoid submerging or using it directly in the shower.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Is your blade steelness steal?",
+      "answer": "Yes",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "I'm facing rusting issue will it affect performence?",
+      "answer": "Rust can occur if metal parts inside are exposed to moisture or not fully dried. Wipe blades thoroughly after each use and store in a dry place. Minor rust inside won’t affect performance, so you can keep using the trimmer. If it ever stops working, we’ll assist you.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How often should blades be replaced?",
+      "answer": "No need to replace the blades. Our trimmers use durable stainless steel blades that last long with regular cleaning and proper care.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "My trimmer is not working what should I do?",
+      "answer": "If your trimmer isn’t working, the battery may be fully drained. Charge it with a Type‑A to Type‑C cable for the time mentioned in the box, and it should work again.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How should I clean the trimmer after use ?",
+      "answer": "It is recommended to clean the trimmer after every use by rinsing the washable head and removing trapped hair from the blades.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How many attachments are there with this trimmer",
+      "answer": "5",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How many Combs is there with this trimmer",
+      "answer": "4",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "I have lost/broken my Attachmrnent. Do you sell Attachments/blades/combs sepreatly?",
+      "answer": "No",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Can I get clean shave trim?",
+      "answer": "This trimmer gives a close 0.5 mm trim. While it doesn’t provide a complete zero shave, you can use the shaver head attachment for a finish much closer to a clean‑shaven look.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "What is the lightning indiaction of this trimmer?",
+      "answer": "The trimmer has a display that shows the exact charge percentage, so you can easily track the battery level while charging or during use.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Can I use the trimmer for both beard and body grooming?",
+      "answer": "This trimmer comes with multiple attachments. One is designed for body head attachment. For extra safety during body grooming, the body head also comes with a comb attachment that helps protect your skin while trimming.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Is there digital display",
+      "answer": "Yes, Digital display",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "What does tap sign mean?",
+      "answer": "The tap sign means the trimmer needs cleaning. Remove hairs inside with the brush, wash the detachable head under running water, dry it properly, then reattach. This keeps it hygienic, prevents residue build‑up, and maintains performance.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Are the attachments easy to change ?",
+      "answer": "Yes, the trimmer features magnetic attachments that easily snap on and off for quick switching between grooming styles.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "What length settings are available ?",
+      "answer": "The trimmer includes beard combs with 3mm, 6mm, 9mm, and 12mm settings, along with multi-length body grooming settings including 2mm, 3.5mm, 5mm, and 6mm.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "What attachments come with the Full Body Trimmer ?",
+      "answer": "The trimmer includes attachments for beard trimming, body grooming, shaving, precision styling, and nose & ear trimming.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How many attachments are included with the trimmer ?",
+      "answer": "5 magnetic head attachments",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "I want to purchase HardCase",
+      "answer": "You can purchase, it's available sepreatly on our website",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How do I get the clean shave with shaver head",
+      "answer": "For a clean shave, first trim your beard to 0.5 mm, then switch to the shaver head for a closer finish. Keep skin clean and dry, hold the shaver head flat, move slowly, and stretch the skin slightly for better contact. This gives a smooth, razor‑like shave look with comfort and precision.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Can I use body head on groin area",
+      "answer": "Yes, you can use the body head on the groin area with the body head attachment for added safety and comfort. It ensures smoother trimming, reduces nicks, and gives a safer grooming experience.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "What does ceramic blade stands for",
+      "answer": "A ceramic blade is made from advanced ceramic material rather than traditional metal. Ceramic blades are harder, more durable, and stay sharper for longer, which means smoother trimming with less friction and heat. They are also rust-resistant and safer for sensitive skin, making them ideal for grooming tools",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Will it really last for 365?",
+      "answer": "Our Legend trimmer offers up to 300 minutes of run time. A normal trim usually takes about 6–7 minutes. If you trim once a week (around 4 trims a month), the trimmer’s battery capacity will last for approximately a year - that’s 365 days of use.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "What's The Run time?",
+      "answer": "300",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Can I use the trimmer for both beard and body grooming?",
+      "answer": "This trimmer has been specifically designed for beard grooming. We recommend using it only for beard trimming to ensure the best performance and safety.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Can I get clean shave trim?",
+      "answer": "No, this trimmer is designed to give you a close trim of 0.5 mm. It does not provide a complete zero shave.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Is there digital display",
+      "answer": "Light indication",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How many Combs is there with this trimmer",
+      "answer": "2",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "How many attachments are there with this trimmer",
+      "answer": "1",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Does your trimmer is waterproof can i take it in shower?",
+      "answer": "This trimmer is IPX5 water‑resistant, so you can rinse the head under running water after removing it. It’s not fully waterproof, so avoid using it in the shower or submerging it.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "What's The Run time?",
+      "answer": "120 minutes",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "What charging port is there in trimmer?",
+      "answer": "2-pin",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Does your trimmer is waterproof can i take it in shower?",
+      "answer": "This trimmer is IPX7 waterproof, meaning it can withstand immersion in water up to 1 meter for 30 minutes. You can safely rinse and clean it under running water, and accidental drops won’t harm it. For durability, avoid prolonged submersion or direct use in the shower.",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Is your blade steelness steal?",
+      "answer": "No, It's ceramic",
+      "category": "Trimmer FAQs"
+    },
+    {
+      "question": "Can I use the trimmer for both beard and body grooming?",
+      "answer": "No, this trimmer is designed only for body and groin areas. It comes with ceramic blades that provide extra safety and comfort for sensitive zones. We recommend using it exclusively for body grooming to ensure the best performance and protection.",
+      "category": "Trimmer FAQs"
+    }
+  ],
+  "policies": [
+    {
+      "topic": "Delivery Dispatch Timeline",
+      "content": "We try to dispatch all our orders within 24-48 hours in normal BAU days. Please be advised that shipments are not sent out on Saturdays, Sundays, or any Holidays. We do not guarantee arrival dates or times and it is dependent on the courier partner and location."
+    },
+    {
+      "topic": "Delivery Timeline After Shipping",
+      "content": "Delivery typically takes 3–4 days after the order has been shipped. If an order is delayed or marked as delivered but has not been received, contact customer support within 48 business hours. Orders placed in the 18-hour sale may take longer to dispatch."
+    },
+    {
+      "topic": "Shipping Charges (Shipping Policy)",
+      "content": "The shipping policy states that shipping charges of ₹199 apply to order value below ₹10, and shipping charges of ₹99 apply to order value below ₹399. Shipping and handling charges are shown at checkout before payment."
+    },
+    {
+      "topic": "Shipping Charges (FAQ)",
+      "content": "The FAQ states that orders below ₹299 incur a ₹99 shipping fee. It also states that Cash on Delivery orders incur an additional ₹80 COD fee, which is non-refundable."
+    },
+    {
+      "topic": "Cash on Delivery Fee",
+      "content": "Cash on Delivery orders incur an additional ₹80 COD fee. The fee is non-refundable. The FAQ also states that COD order shipping charges are non-refundable when a shipped order is cancelled."
+    },
+    {
+      "topic": "Multiple Shipments",
+      "content": "An order may be shipped in multiple packages depending on the products ordered, and the packages may arrive separately. Separate tracking updates can be viewed through Track Order or the customer account."
+    },
+    {
+      "topic": "Delivery Attempts and Returned Orders",
+      "content": "Courier partners typically attempt delivery up to 3 times before returning the order. For a prepaid order marked as Returned, the refund is initiated to the original payment method once the returned products reach the warehouse."
+    },
+    {
+      "topic": "Delivery Signature and Damage Claims",
+      "content": "Goods need to be signed for upon delivery. If the customer cannot sign, they may suggest an alternative person such as a family member, colleague, or neighbour. Bombay Shaving Company takes no responsibility for goods signed by an alternative person, is not responsible for damage after delivery, and requires shortages or damage to be reported to customer service on the day of delivery."
+    },
+    {
+      "topic": "Cancellation Window",
+      "content": "An order can be cancelled only if it has not yet been packed or shipped. If it has already been packed or shipped, cancellation is not possible; the customer may refuse delivery instead. Cancellation requests can be raised by emailing care@bombayshavingcompany.com."
+    },
+    {
+      "topic": "Cancellation Refund",
+      "content": "If a shipped order is refused and it was prepaid, the refund is processed to the original payment method within 5–7 working days. COD order shipping charges are non-refundable."
+    },
+    {
+      "topic": "Returns and Exchanges",
+      "content": "For hygiene reasons, the Cancellations page states that Bombay Shaving Company does not accept returns or exchanges, but offers replacements in eligible cases. The product must be unused, sealed, and in its original packaging with intact labels. An unboxing video is required. Customers should email care@bombayshavingcompany.com within 48 hours of receiving the order with the order ID, request details, and required evidence."
+    },
+    {
+      "topic": "Defective, Damaged, Expired, or Wrong Product",
+      "content": "The FAQ directs customers with a defective, damaged, expired, or wrong product to raise a request through https://www.bombayshavingcompany.com/apps/return_prime, provide clear images of the delivered items and photos of the outer shipping box with the shipping label visible, and raise the request within 2 working days."
+    },
+    {
+      "topic": "Replacement Process",
+      "content": "After a replacement request is reviewed and approved, Bombay Shaving Company says it will arrange a pickup within 2-4 business days. Once the product is received in its original condition, the replacement is shipped within 24-48 hours."
+    },
+    {
+      "topic": "Refund Timeline",
+      "content": "For prepaid orders, refunds are initiated immediately upon cancellation, return approval, or a failed order. The refund typically reflects in the source account within 2–3 working days, excluding Saturdays, Sundays, and national holidays. If it has been 5–7 working days since initiation, the customer is asked to check the bank or payment-source statement and contact care@bombayshavingcompany.com if the refund is still missing."
+    },
+    {
+      "topic": "Refund for Returned Courier Orders",
+      "content": "If a prepaid order is marked Returned by the courier, the refund is initiated to the original payment method once the returned products are received at the warehouse. Refunds are credited within 2–3 working days from the date of processing, excluding Saturdays, Sundays, and national holidays."
+    },
+    {
+      "topic": "Payment Methods",
+      "content": "The site references prepaid orders and Cash on Delivery (COD) orders, but the supplied policy and FAQ pages do not provide a complete list of accepted payment instruments such as cards, UPI, or net banking. The payment method cannot be changed after an order is placed; if the order has not been packed or shipped, the customer may cancel and place a new order with the preferred method."
+    },
+    {
+      "topic": "Payment Deducted but Order Not Confirmed",
+      "content": "If payment is deducted but the order is not confirmed, the site advises checking the email inbox and spam/junk folder. It states that the amount will be automatically refunded to the source account within 48 hours."
+    },
+    {
+      "topic": "Warranty Term",
+      "content": "The warranty registration page lists a 2-year manufacturing warranty for the following electrical appliances: PowerPlay Beard Trimmer, Power Play Nxt Beard Trimmer, Power Styler Beard Trimmer, HeadShaver Pro, Full Body Trimmer, Premium Multigroomer, OG Black Beard Trimmer, Landscaper 2.0 (Pubic Hair Trimmer), Power Groomer, Power Styler Edge Beard Trimmer, Baller Pubic Hair Trimmer, Electric Beard Trimmer, and Full Body Trimmer Special Edition."
+    },
+    {
+      "topic": "Warranty Coverage",
+      "content": "The FAQ states that the warranty generally covers manufacturing defects and functional issues under normal usage conditions. Accessories such as combs, attachments, and charging cables are not covered; the warranty applies only to the main trimmer unit."
+    },
+    {
+      "topic": "Warranty Claim and Registration",
+      "content": "For warranty assistance, contact Bombay Shaving Company Support with order details and product information. For products purchased from any channel except the website, the warranty registration page says to give a missed call on 8071188701 to register the trimmer."
+    }
+  ]
+}
