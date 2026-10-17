@@ -1,0 +1,76 @@
+# CONTRACTS (fixed shapes — change only deliberately, and update this file)
+
+## POST /api/chat
+Request:
+```json
+{ "message": "Suggest a razor for sensitive skin", "conversation_id": "guest_8c36b3ac-..." }
+```
+Constraints: `message` 1–1000 chars (whitespace stripped); `conversation_id` 1–100 chars. Invalid input → 422 before our code runs.
+
+Response envelope (always these four keys):
+```json
+{
+  "success": true,
+  "conversation_id": "guest_8c36b3ac-...",
+  "response": {
+    "type": "recommendation",
+    "markdown": "...",
+    "product_tray": [
+      { "product_id": "8447139315866", "name": "...", "price": 450.0,
+        "image_url": "https://...", "product_url": "https://...", "availability": "in_stock" }
+    ],
+    "suggested_prompts": []
+  },
+  "error": null
+}
+```
+- `type` ∈ `recommendation | comparison | knowledge | support | clarification | out_of_scope | fallback`.
+- `availability` ∈ `in_stock | out_of_stock` (a deliberate addition to the original design doc).
+- Non-recommendation responses: `product_tray` is `[]`.
+- Failure: `{"success": false, "conversation_id": "...", "response": null, "error": {"code": "...", "message": "..."}}` (Phase 13; convert FastAPI's default 422 shape to this too).
+- `GET /health` → `{"status":"ok","service":"bsc-backend"}`.
+
+Fallback response body:
+```json
+{ "type": "fallback",
+  "markdown": "I’m unable to verify the exact details right now. Please try again or ask about a specific product or category.",
+  "product_tray": [],
+  "suggested_prompts": ["Suggest a trimmer for body grooming", "Compare two trimmers"] }
+```
+
+## Query Understanding output (`app/schemas/query.py`)
+```json
+{ "intent": "recommendation|comparison|knowledge|support",
+  "scope": "in_scope|out_of_scope",
+  "entities": {},  "filters": {},  "context": {} }
+```
+- `entities`: products, category, use_case, body_area, attributes. `filters`: budget_max/min, skin_type, hair_type, gender, required features, exclusions. `context`: carried-over info, e.g. `previously_mentioned_product_ids`.
+- Empty fields are fine. It extracts; it does **not** answer or judge sufficiency. It resolves references like "this product" using conversation state. Exact product matching happens in retrieval.
+- `out_of_scope` is a `scope` value, not a fifth intent.
+- Example: `{"intent":"recommendation","scope":"in_scope","entities":{"category":"trimmer","use_case":["body_grooming"]},"filters":{"budget_max":2000},"context":{"previously_mentioned_product_ids":[]}}`
+
+## Pending clarification (in conversation state)
+```json
+{ "pending_clarification": { "original_query": "Suggest a trimmer", "intent": "recommendation",
+  "missing_field": "use_case",
+  "question": "What will you mainly use the trimmer for: beard grooming, body grooming, or both?",
+  "attempt_count": 1 } }
+```
+
+## Specialist output (`app/schemas/specialist.py`)
+```json
+{ "specialist": "recommendation|comparison|knowledge|support",
+  "status": "success|empty|error",
+  "data": {}, "sources": [], "warnings": [] }
+```
+`data` differs by specialist: recommendation = list of full product records; comparison = products + comparable fields; knowledge = retrieved chunks with title/heading/URL; support = retrieved FAQ/policy items + contact info.
+
+## Composer output (internal)
+```json
+{ "type": "recommendation", "markdown": "...", "product_tray": [],
+  "metadata": { "specialists_used": [], "sources": [] } }
+```
+The envelope's `response` = `type, markdown, product_tray, suggested_prompts` (metadata stays internal).
+
+## Embedding record (single `embeddings` table)
+`source_type` (`product|blog|support`), `source_id`, `content`, `metadata` (jsonb), `embedding` vector(1024).

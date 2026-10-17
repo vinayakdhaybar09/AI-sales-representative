@@ -1,0 +1,31 @@
+from functools import lru_cache
+from typing import Literal
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    """All configuration for the app, loaded from environment variables / .env."""
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
+
+    #app
+    app_env: str = "development"
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
+
+    # Secrets (optional for now; required by the phase that first uses them)
+    mistral_api_key: SecretStr | None = None
+    huggingface_api_key: SecretStr | None = None
+    database_url: SecretStr | None = None
+
+    # Models
+    chat_model: str = "mistral-small-latest"
+    embedding_model: str = "mistral-embed"
+    embedding_dimensions: int = 1024
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
