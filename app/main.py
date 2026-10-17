@@ -5,10 +5,10 @@ from fastapi import FastAPI
 from app.api.routes import chat, health
 from app.core.config import get_settings
 from app.core.logging import setup_logging
+from app.db.connection import open_pool, close_pool
 
 setup_logging()
 logger = logging.getLogger(__name__)
-
 
 
 @asynccontextmanager
@@ -20,7 +20,9 @@ async def lifespan(app: FastAPI):
         settings.chat_model,
         settings.embedding_model,
     )
+    await open_pool()
     yield
+    await close_pool()
     logger.info("Shutting down")
 
 

@@ -1,0 +1,49 @@
+-- app/db/schema.sql
+-- Run once against your Neon database (or re-run; all statements are idempotent).
+-- Usage: psql $DATABASE_URL -f app/db/schema.sql
+
+-- ─── pgvector extension ──────────────────────────────────────────────────────
+-- Must be enabled before creating vector columns.
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- ─── products ─────────────────────────────────────────────────────────────────
+-- Single source of truth for price, availability, URL, image, and product
+-- details. The 'details' jsonb column stores everything that doesn't need its
+-- own indexed column: features, detailed_information, specifications, images
+-- list, discount_percentage, and the source snapshot metadata.
+--
+-- 'availability' stores the string directly ('in_stock' | 'out_of_stock');
+-- mapped from availability.status in the JSON.
+CREATE TABLE IF NOT EXISTS products (
+    id               TEXT        PRIMARY KEY,       -- Shopify product id
+    category         TEXT        NOT NULL,
+    name             TEXT        NOT NULL,
+    url              TEXT        NOT NULL,
+    image_url        TEXT        NOT NULL DEFAULT '',
+    description      TEXT        NOT NULL DEFAULT '',
+    price            NUMERIC     NOT NULL DEFAULT 0,
+    original_price   NUMERIC     NOT NULL DEFAULT 0,
+    rating           NUMERIC     NOT NULL DEFAULT 0,
+    review_count     INTEGER     NOT NULL DEFAULT 0,
+    availability     TEXT        NOT NULL DEFAULT 'out_of_stock',
+    details          JSONB       NOT NULL DEFAULT '{}'
+);
+
+-- ─── embeddings ───────────────────────────────────────────────────────────────
+-- One row per embeddable chunk (product, blog chunk, support item).
+-- 'source_type' ∈ 'product' | 'blog' | 'support'.
+-- 'source_id' is unique within a source_type (e.g. Shopify id, faq:0, policy:1).
+-- 'embedding' is a 1024-dim vector matching mistral-embed.
+CREATE TABLE IF NOT EXISTS embeddings (
+    id          BIGSERIAL   PRIMARY KEY,
+    source_type TEXT        NOT NULL,
+    source_id   TEXT        NOT NULL,
+    content     TEXT        NOT NULL,
+    metadata    JSONB       NOT NULL DEFAULT '{}',
+    embedding   VECTOR(1024),
+    UNIQUE (source_type, source_id)
+);
+
+-- Index for cosine similarity search on embeddings (added here for reference;
+-- exact search is fine for MVP — enable IVFFlat/HNSW later if needed).
+-- CREATE INDEX ON embeddings USING hnsw (embedding vector_cosine_ops);
