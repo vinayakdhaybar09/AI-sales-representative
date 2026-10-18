@@ -1,22 +1,16 @@
 import logging
 
-from app.schemas.chat import (
-    ChatEnvelope,
-    ChatRequest,
-    ChatResponseBody,
-    ProductCard,
-)
+from app.graph.builder import get_graph
+from app.schemas.chat import ChatEnvelope, ChatRequest, ErrorInfo
 
 logger = logging.getLogger(__name__)
 
 
 async def handle_chat(request: ChatRequest) -> ChatEnvelope:
-    """Phase 2 STUB. Returns fake data in the real response shape.
+    """Run the LangGraph workflow and wrap its result in the response envelope.
 
-    Later phases replace the body of this function with a call to the
-    LangGraph workflow. The signature (request in, envelope out) stays.
+    M5 replaces the catch-all below with proper error classes and retries.
     """
-
     logger.info(
         "Chat request received (conversation_id=%s, message_length=%d)",
         request.conversation_id,
@@ -24,41 +18,24 @@ async def handle_chat(request: ChatRequest) -> ChatEnvelope:
     )
     logger.debug("Message content: %s", request.message)
 
-    text = request.message.lower()
-
-    if "recommend" in text or "suggest" in text:
-        body = ChatResponseBody(
-            type="recommendation",
-            markdown="**[STUB]** Here are two sample products.",
-            product_tray=[
-                ProductCard(
-                    product_id="stub_001",
-                    name="Sample Razor (in stock)",
-                    price=499.0,
-                    image_url="https://example.com/razor.webp",
-                    product_url="https://example.com/products/razor",
-                    availability="in_stock",
-                ),
-                ProductCard(
-                    product_id="stub_002",
-                    name="Sample Body Wash (out of stock)",
-                    price=299.0,
-                    image_url="https://example.com/wash.webp",
-                    product_url="https://example.com/products/wash",
-                    availability="out_of_stock",
-                ),
-            ],
+    try:
+        state = await get_graph().ainvoke(
+            {"conversation_id": request.conversation_id, "message": request.message}
         )
-    else:
-        body = ChatResponseBody(
-            type="knowledge",
-            markdown=f"**[STUB]** You said: {request.message}",
-            suggested_prompts=["Suggest a razor for sensitive skin"],
+        return ChatEnvelope(
+            success=True,
+            conversation_id=request.conversation_id,
+            response=state["response"],
+            error=None,
         )
-
-    return ChatEnvelope(
-        success=True,
-        conversation_id=request.conversation_id,
-        response=body,
-        error=None,
-    )
+    except Exception:
+        logger.exception("Chat workflow failed (conversation_id=%s)", request.conversation_id)
+        return ChatEnvelope(
+            success=False,
+            conversation_id=request.conversation_id,
+            response=None,
+            error=ErrorInfo(
+                code="internal_error",
+                message="Something went wrong while processing your message. Please try again.",
+            ),
+        )

@@ -8,8 +8,8 @@ Phases 1–4 are done. The remaining work is grouped into five milestones. Work 
 | 2 | Schemas, service layer, stub `/api/chat` | Verified |
 | 3 | Config, env vars, logging | Verified |
 | 4 | Neon + pgvector + `products` table + product ingestion | Verified |
-| M1 | Embeddings + vector search (old 5–6) | In progress |
-| M2 | Query Understanding + LangGraph skeleton, in-memory state (old 7–8) | Not started |
+| M1 | Embeddings + vector search (old 5–6) | Verified |
+| M2 | Query Understanding + LangGraph skeleton, in-memory state (old 7–8) | In progress |
 | M3 | Sufficiency, clarification, out-of-scope, all four specialists (old 9–10) | Not started |
 | M4 | Composer, validator, retry-once, fallback, tray builder, real `handle_chat` (old 11) | Not started |
 | M5 | Conversation persistence, session expiry, error handling, retries, error envelope (old 12–13) | Not started |

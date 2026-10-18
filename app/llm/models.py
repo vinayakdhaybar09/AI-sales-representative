@@ -7,7 +7,7 @@ SecretStr for `api_key`, so the raw value is never unwrapped in our code.
 import logging
 from functools import lru_cache
 
-from langchain_mistralai import MistralAIEmbeddings
+from langchain_mistralai import ChatMistralAI, MistralAIEmbeddings
 
 from app.core.config import get_settings
 
@@ -39,4 +39,22 @@ def get_embeddings() -> MistralAIEmbeddings:
         wait_time=20,
         timeout=60,
         max_concurrent_requests=2,
+    )
+
+
+@lru_cache
+def get_chat_model() -> ChatMistralAI:
+    """Return the shared Mistral chat model (temperature 0: we extract, not create)."""
+    settings = get_settings()
+    if settings.mistral_api_key is None:
+        raise MissingApiKeyError(
+            "MISTRAL_API_KEY is not set. Add it to .env and restart."
+        )
+    logger.info("Building chat model (model=%s)", settings.chat_model)
+    return ChatMistralAI(
+        model=settings.chat_model,
+        api_key=settings.mistral_api_key,
+        temperature=0,
+        max_retries=2,
+        timeout=60,
     )

@@ -86,7 +86,7 @@ Specialist `status`: `success | empty | error`. `warnings` carries things like "
 **Non-critical (log only):** Markdown quality, optional badges, optional source metadata, wording.
 
 ## Conversation state
-In-memory first (Phase 8), moved to Postgres in Phase 12. Pass only *relevant* recent history to the LLM, not everything. Expire inactive conversations after ~10–15 minutes (details in Phase 12).
+In-memory first (M2, `app/graph/memory_store.py`), moved to Postgres in M5. Pass only *relevant* recent history to the LLM, not everything. Expire inactive conversations after ~10–15 minutes (details in Phase 12).
 
 ## Out-of-scope / suggested prompts
 Suggested prompts come from a **small predefined list** of BSC questions (not freely generated). Out-of-scope shows 1–2 of them.

@@ -11,3 +11,4 @@ pgvector==0.5.1
 # Embeddings + vector search (M1)
 langchain-core==1.6.12
 langchain-mistralai==1.1.6
+langgraph==1.2.16

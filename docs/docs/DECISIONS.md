@@ -8,7 +8,7 @@
 | Users | Guests identified by `conversation_id` only |
 | Framework | Async FastAPI for network-bound code; plain `def` for pure logic |
 | Packaging | `pip` + venv + `requirements.txt` (no Docker, no uv, no Poetry) |
-| Chat model | `mistral-small-latest` |
+| Chat model | `mistral-small-latest` is the default in code; the owner's free key has 0 req/min on it, so `.env` sets `CHAT_MODEL=open-mistral-nemo` (approved in M2) |
 | Embeddings | `mistral-embed`, 1024 dims. Hugging Face is fallback only |
 | Orchestration | LangGraph for workflow, LangChain as model/embedding/retrieval abstraction |
 | Business logic | SQL, filters, tray building, validation, sufficiency in Python, not prompts |

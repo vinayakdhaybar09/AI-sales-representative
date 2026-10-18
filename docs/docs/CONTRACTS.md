@@ -46,6 +46,7 @@ Fallback response body:
 ```
 - `entities`: products, category, use_case, body_area, attributes. `filters`: budget_max/min, skin_type, hair_type, gender, required features, exclusions. `context`: carried-over info, e.g. `previously_mentioned_product_ids`.
 - Empty fields are fine. It extracts; it does **not** answer or judge sufficiency. It resolves references like "this product" using conversation state. Exact product matching happens in retrieval.
+- `entities`, `filters`, `context` are typed Pydantic sub-models with all fields optional (an empty `{}` is still valid). `context.previously_mentioned_product_ids` is filled by Python from conversation state, never by the LLM.
 - `out_of_scope` is a `scope` value, not a fifth intent.
 - Example: `{"intent":"recommendation","scope":"in_scope","entities":{"category":"trimmer","use_case":["body_grooming"]},"filters":{"budget_max":2000},"context":{"previously_mentioned_product_ids":[]}}`
 
