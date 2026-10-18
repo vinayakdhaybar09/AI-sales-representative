@@ -34,3 +34,9 @@ app = FastAPI(
 
 app.include_router(health.router)
 app.include_router(chat.router)
+
+# Dev-only vector search; never exposed outside development.
+if get_settings().app_env == "development":
+    from app.api.routes import dev
+
+    app.include_router(dev.router)
