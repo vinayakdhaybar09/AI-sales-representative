@@ -14,7 +14,7 @@ Stack: Python 3.11+, FastAPI, Uvicorn, Pydantic v2 / pydantic-settings, LangChai
 | `docs/CONTRACTS.md` | Any schema, API, state, or JSON shape. **Contracts are fixed; do not change them silently** |
 | `docs/DATA.md` | Any DB, ingestion, embedding, retrieval work. Includes known data quirks |
 | `docs/DECISIONS.md` | Before proposing any alternative tool, pattern, or scope change |
-| `docs/PHASES.md` | To find the current phase, its deliverables, and its verification checklist |
+| `docs/PHASES.md` | To find the current milestone, its deliverables, and its done-when criteria |
 
 ## Hard rules (never violate)
 1. **Layering.** API routes → service → graph nodes → specialists → repositories/retrievers → DB. A layer must not reach past the one below it. Routes know HTTP only; repositories know SQL only; retrievers know vector search only; the `llm/` module is the only place that builds models.
@@ -32,21 +32,25 @@ Stack: Python 3.11+, FastAPI, Uvicorn, Pydantic v2 / pydantic-settings, LangChai
 13. **Do not verify LangChain / LangGraph / Mistral / pgvector / psycopg APIs from memory.** Check current official docs (web search/fetch) before using them, pin versions in `requirements.txt`, and say what you could not run.
 14. **Data is used as-is.** Do not clean or "fix" the datasets or support-data contradictions (see `docs/DATA.md` → Known issues). Surface them, do not resolve them.
 
-## Existing code conventions (Phases 1–3 are already built)
+## Existing code conventions (Phases 1–4 are already built)
 - Layout: `app/{main.py, api/routes/, core/, schemas/, services/, graph/, specialists/, llm/, db/, retrieval/, response/}`; `data/` holds the four JSON files; `scripts/` holds one-off scripts (run as `python -m scripts.<name>` from project root).
 - Config: `from app.core.config import get_settings` (cached `Settings`). Never call `os.getenv` or instantiate `Settings()` directly.
 - Schemas: Pydantic models in `app/schemas/`. `ChatRequest`, `ChatEnvelope`, `ChatResponseBody`, `ProductCard`, `ErrorInfo` already exist in `app/schemas/chat.py`.
-- `app/services/chat_service.py::handle_chat(request) -> ChatEnvelope` is currently a **stub**. Its signature stays; its body is replaced by a call to the LangGraph workflow (Phase 8+). Delete the stub logic when replaced.
+- `app/services/chat_service.py::handle_chat(request) -> ChatEnvelope` is currently a **stub**. Its signature stays; its body is replaced by a call to the LangGraph workflow (M2 builds the graph, M4 completes it). Delete the stub logic when replaced.
 - Settings fields: `app_env, log_level, mistral_api_key, huggingface_api_key, database_url, chat_model, embedding_model, embedding_dimensions`.
 - Dependencies: `pip` + venv + `requirements.txt` (`pip freeze > requirements.txt` after installing). No Docker, no uv, no Poetry.
 
 ## How to work
-- **One phase at a time** (see `docs/PHASES.md`). Implement the phase fully, run its verification, report results, then stop. Do not write code for later phases.
-- Create folders/files only when the current phase needs them.
+- **One milestone at a time** (see `docs/PHASES.md`). Do NOT write code for later milestones.
+- Inside a milestone, build everything it needs fully and properly. No stubs or TODOs for things in scope. Quality matters more than speed.
+- Create folders/files only when the current milestone needs them.
+- Don't create extra docs or write long explanations. Keep the existing docs accurate; edit them only when a contract or flow actually changes.
+- At the end of each milestone, give the owner a **TEST GUIDE** and then stop. It must contain: exact commands to run with the expected output of each; 3–5 sample chat messages with what a correct response looks like; 2–3 "try to break it" checks. The owner tests and replies with results before you continue.
+- If the owner reports an error, fix it from the exact error text.
 - Prefer small, readable functions over clever abstractions. The owner is a frontend developer new to RAG and must be able to read and modify the code: add short docstrings explaining *why*, not just *what*.
 - Verification is `curl` + scripts + the phase checklist. No tracing, no heavy test suites. Optional: tiny `pytest` tests for pure-Python logic (sufficiency rules, validator, tray builder).
 - When something is ambiguous or conflicts with these docs, **ask or flag it** in your final message instead of choosing silently. If you change a contract, update `docs/CONTRACTS.md` in the same change.
-- Final message of each phase: what changed (files), how to run, verification results (pass/fail per checklist item), what you could not test, and any assumptions.
+- Final message of each milestone: use the report template in `docs/PHASES.md` (files changed, verification per done-when item, what you could not test, assumptions) followed by the TEST GUIDE.
 
 ## Commands
 ```bash
