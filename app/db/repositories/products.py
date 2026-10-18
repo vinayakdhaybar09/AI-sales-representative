@@ -136,3 +136,47 @@ async def count_products(conn: psycopg.AsyncConnection) -> int:
         await cur.execute("SELECT COUNT(*) FROM products")
         row = await cur.fetchone()
         return row[0] if row else 0
+
+
+async def get_products_by_ids(
+    conn: psycopg.AsyncConnection,
+    product_ids: list[str],
+) -> list[dict[str, Any]]:
+    """Fetch products for the given IDs, in the same order as `product_ids`.
+
+    Unknown IDs are skipped. Out-of-stock products are returned like any other.
+    """
+    if not product_ids:
+        return []
+    async with conn.cursor(row_factory=dict_row) as cur:
+        await cur.execute("SELECT * FROM products WHERE id = ANY(%s)", (product_ids,))
+        by_id = {row["id"]: row for row in await cur.fetchall()}
+    return [by_id[pid] for pid in product_ids if pid in by_id]
+
+
+async def find_products_by_name(
+    conn: psycopg.AsyncConnection,
+    name: str,
+    limit: int = 4,
+) -> tuple[list[dict[str, Any]], str]:
+    """Resolve a user-written product name with SQL.
+
+    Tries a case-insensitive exact match first, then 'name contains the text'.
+    Returns (rows, match_type) where match_type is 'exact', 'contains' or 'none'.
+    Names are not unique in the data, so several rows can come back.
+    """
+    async with conn.cursor(row_factory=dict_row) as cur:
+        await cur.execute(
+            "SELECT * FROM products WHERE LOWER(name) = LOWER(%s) ORDER BY id LIMIT %s",
+            (name, limit),
+        )
+        rows = await cur.fetchall()
+        if rows:
+            return rows, "exact"
+        await cur.execute(
+            "SELECT * FROM products WHERE position(LOWER(%s) in LOWER(name)) > 0 "
+            "ORDER BY length(name), id LIMIT %s",
+            (name, limit),
+        )
+        rows = await cur.fetchall()
+        return rows, ("contains" if rows else "none")

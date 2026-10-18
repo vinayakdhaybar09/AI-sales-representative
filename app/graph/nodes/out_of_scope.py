@@ -1,6 +1,7 @@
 import logging
 
 from app.graph.state import ChatState
+from app.response.suggested_prompts import pick
 from app.schemas.chat import ChatResponseBody
 
 logger = logging.getLogger(__name__)
@@ -9,7 +10,6 @@ OUT_OF_SCOPE_MARKDOWN = (
     "I can only help with Bombay Shaving Company products, grooming advice "
     "and order or policy questions. Is there something in that area I can help with?"
 )
-SUGGESTED_PROMPTS = ["Suggest a razor for sensitive skin", "How do I fix a patchy beard?"]
 
 
 async def out_of_scope(state: ChatState) -> dict:
@@ -19,6 +19,6 @@ async def out_of_scope(state: ChatState) -> dict:
         "response": ChatResponseBody(
             type="out_of_scope",
             markdown=OUT_OF_SCOPE_MARKDOWN,
-            suggested_prompts=SUGGESTED_PROMPTS,
+            suggested_prompts=pick(2, state["message"]),
         )
     }

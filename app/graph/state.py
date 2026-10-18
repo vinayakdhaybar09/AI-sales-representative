@@ -3,7 +3,7 @@
 Each node returns only the keys it changes; LangGraph merges them in.
 """
 
-from typing import TypedDict
+from typing import Any, TypedDict
 
 from app.schemas.chat import ChatResponseBody
 from app.schemas.query import QueryUnderstanding
@@ -17,8 +17,11 @@ class ChatState(TypedDict, total=False):
     # loaded from the conversation store
     history: list[dict[str, str]]          # [{"role": "user"|"assistant", "content": ...}]
     previous_product_ids: list[str]        # product IDs shown earlier in this conversation
+    pending_clarification: dict[str, Any] | None   # docs/CONTRACTS.md shape
     # produced along the way
     query: QueryUnderstanding
+    pending_resolved: bool                 # this message answered a pending clarification
+    search_text: str                       # text used for retrieval (original + answer when resuming)
     sufficient: bool
     missing_field: str | None
     specialist_result: SpecialistOutput

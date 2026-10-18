@@ -74,3 +74,16 @@ async def search_by_vector(
             (Vector(query_embedding), source_type, Vector(query_embedding), k),
         )
         return await cur.fetchall()
+
+
+async def find_support_contact_rows(conn: psycopg.AsyncConnection) -> list[str]:
+    """Support texts that mention an email address or a tracking link.
+
+    Used to hand back the care email / tracking link exactly as written in the
+    data, even when the semantic search did not retrieve those rows.
+    """
+    cur = await conn.execute(
+        "SELECT content FROM embeddings WHERE source_type = 'support' "
+        "AND (content ILIKE '%@%' OR content ILIKE '%track%') ORDER BY source_id"
+    )
+    return [row[0] for row in await cur.fetchall()]

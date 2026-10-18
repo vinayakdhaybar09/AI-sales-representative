@@ -9,22 +9,46 @@ from app.schemas.query import QueryUnderstanding
 logger = logging.getLogger(__name__)
 
 
-async def understand(message: str, history: list[dict[str, str]]) -> QueryUnderstanding:
+async def understand(
+    message: str,
+    history: list[dict[str, str]],
+    pending: dict | None = None,
+) -> QueryUnderstanding:
     """Ask the chat model for a structured reading of `message`."""
     model = get_chat_model().with_structured_output(QueryUnderstanding)
-    result = await ainvoke_with_429_retry(model, build_messages(message, history))
+    result = await ainvoke_with_429_retry(model, build_messages(message, history, pending))
     if not isinstance(result, QueryUnderstanding):
         raise ValueError("Query Understanding returned no structured output")
     return result
 
 
 async def query_understanding(state: ChatState) -> dict:
-    """LLM step: extract {intent, scope, entities, filters, context}."""
-    query = await understand(state["message"], state.get("history", []))
+    """LLM step: extract {intent, scope, entities, filters, context}.
+
+    Also settles any open clarification: either this message answers it
+    (retrieval then uses original request + answer, and we never ask again) or
+    it is a new request and the pending question is dropped.
+    """
+    pending = state.get("pending_clarification")
+    query = await understand(state["message"], state.get("history", []), pending)
     # Product IDs come from our own state, never from the LLM.
     query.context.previously_mentioned_product_ids = list(state.get("previous_product_ids", []))
-    logger.info(
-        "Query understood (conversation_id=%s, intent=%s, scope=%s)",
-        state["conversation_id"], query.intent, query.scope,
+
+    resolved = bool(
+        pending and query.scope == "in_scope" and query.context.answers_pending_clarification
     )
-    return {"query": query}
+    search_text = state["message"]
+    if resolved:
+        query.intent = pending["intent"]  # an answer never changes the original intent
+        search_text = f"{pending['original_query']}. {state['message']}"
+
+    logger.info(
+        "Query understood (conversation_id=%s, intent=%s, scope=%s, resumed=%s)",
+        state["conversation_id"], query.intent, query.scope, resolved,
+    )
+    return {
+        "query": query,
+        "pending_resolved": resolved,
+        "search_text": search_text,
+        "pending_clarification": None,   # settled either way; clarification may set a new one
+    }

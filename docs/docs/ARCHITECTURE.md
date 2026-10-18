@@ -53,7 +53,7 @@ Clarification and out-of-scope **skip** Specialist → Composer → Validator (t
 - Next message goes through Query Understanding with that history:
   - answers the clarification → merge with `original_query` → Specialist (do not clarify again);
   - new unrelated request → discard pending clarification, process as new.
-- No follow-up flag in the request; detection uses conversation history + the new message.
+- No follow-up flag in the request; detection uses conversation history + the new message. The Query Understanding model reports `context.answers_pending_clarification`; Python then merges `original_query` with the answer for retrieval and skips the sufficiency check (never clarify twice).
 - Clarification response: `type="clarification"`, one focused question, empty `product_tray`, optional `suggested_prompts`.
 
 ## Sufficiency Check (plain Python; proposed defaults, refine in Phase 9)

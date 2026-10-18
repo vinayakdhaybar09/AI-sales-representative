@@ -13,11 +13,12 @@ _conversations: dict[str, dict[str, Any]] = {}
 
 
 def load(conversation_id: str) -> dict[str, Any]:
-    """Return {"history": [...], "previous_product_ids": [...]} (empty if new)."""
+    """Return history, previous_product_ids and pending_clarification (empty if new)."""
     stored = _conversations.get(conversation_id, {})
     return {
         "history": list(stored.get("history", [])),
         "previous_product_ids": list(stored.get("previous_product_ids", [])),
+        "pending_clarification": stored.get("pending_clarification"),
     }
 
 
@@ -25,10 +26,12 @@ def save(
     conversation_id: str,
     history: list[dict[str, str]],
     previous_product_ids: list[str],
+    pending_clarification: dict[str, Any] | None,
 ) -> None:
     _conversations[conversation_id] = {
         "history": history[-MAX_MESSAGES:],
         "previous_product_ids": previous_product_ids,
+        "pending_clarification": pending_clarification,
     }
 
 

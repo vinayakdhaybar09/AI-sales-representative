@@ -55,6 +55,9 @@ async def open_pool() -> None:
         min_size=1,
         max_size=10,
         configure=_configure_conn,
+        # Autocommit: reads must not sit 'idle in transaction' while we wait on
+        # the embedding API (Neon closes such connections).
+        kwargs={"autocommit": True},
         # Do NOT pass open=True here (deprecated in psycopg-pool 3.x).
         # open() is called explicitly below.
         open=False,

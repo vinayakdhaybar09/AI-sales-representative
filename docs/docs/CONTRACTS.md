@@ -46,7 +46,7 @@ Fallback response body:
 ```
 - `entities`: products, category, use_case, body_area, attributes. `filters`: budget_max/min, skin_type, hair_type, gender, required features, exclusions. `context`: carried-over info, e.g. `previously_mentioned_product_ids`.
 - Empty fields are fine. It extracts; it does **not** answer or judge sufficiency. It resolves references like "this product" using conversation state. Exact product matching happens in retrieval.
-- `entities`, `filters`, `context` are typed Pydantic sub-models with all fields optional (an empty `{}` is still valid). `context.previously_mentioned_product_ids` is filled by Python from conversation state, never by the LLM.
+- `entities`, `filters`, `context` are typed Pydantic sub-models with all fields optional (an empty `{}` is still valid). `context.previously_mentioned_product_ids` is filled by Python from conversation state, never by the LLM. `context.answers_pending_clarification` (bool, default false) is set by the LLM only when the message answers the open clarification question.
 - `out_of_scope` is a `scope` value, not a fifth intent.
 - Example: `{"intent":"recommendation","scope":"in_scope","entities":{"category":"trimmer","use_case":["body_grooming"]},"filters":{"budget_max":2000},"context":{"previously_mentioned_product_ids":[]}}`
 
@@ -64,7 +64,12 @@ Fallback response body:
   "status": "success|empty|error",
   "data": {}, "sources": [], "warnings": [] }
 ```
-`data` differs by specialist: recommendation = list of full product records; comparison = products + comparable fields; knowledge = retrieved chunks with title/heading/URL; support = retrieved FAQ/policy items + contact info.
+`data` differs by specialist:
+- recommendation: `{products: [full products row + match_score]}` (max 5, similarity order, out-of-stock kept).
+- comparison: `{products: [full rows], comparable_fields: [...], unresolved: [names]}`; ambiguous or fuzzy name matches add warnings.
+- knowledge: `{chunks: [{source_id,title,heading,category,url,content,score}], products: [full rows for named products]}`.
+- support: `{items: [{source_id,kind,category,content,score}], contact_info: {tracking_url, care_email}, live_order_data_available: false}`.
+Warnings used so far: `trimmer_model_not_identified`, `shipping_charges_differ_between_sources`, `returns_wording_differs_between_sources`, `ambiguous_product_name`, `fuzzy_match`, `category_not_matched`, `no_products_within_budget`, `includes_out_of_stock`, `no_relevant_*`, `could_not_resolve_two_products`, `specialist_failed`.
 
 ## Composer output (internal)
 ```json

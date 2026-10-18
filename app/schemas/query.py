@@ -44,6 +44,10 @@ class Filters(BaseModel):
 
 class Context(BaseModel):
     previously_mentioned_product_ids: list[str] = Field(default_factory=list)
+    answers_pending_clarification: bool = Field(
+        default=False,
+        description="True only if the message answers the question the assistant just asked.",
+    )
 
 
 class QueryUnderstanding(BaseModel):
@@ -66,3 +70,9 @@ class QueryUnderstanding(BaseModel):
         if isinstance(data, dict) and data.get("intent") == "out_of_scope":
             data = {**data, "intent": "knowledge", "scope": "out_of_scope"}
         return data
+
+
+class Clarification(BaseModel):
+    """The single clarifying question the assistant asks."""
+
+    question: str = Field(description="One short question, ending with a question mark.")

@@ -3,7 +3,7 @@
 START -> session_loader -> query_understanding -> out_of_scope | sufficiency
 sufficiency -> clarification | specialist_<intent> -> composer
 out_of_scope / clarification / composer -> finalize -> END
-(Validator, retry-once and fallback are added in M4.)
+(Composer is a stub until M4, which also adds the validator, retry-once and fallback.)
 """
 
 from functools import lru_cache
