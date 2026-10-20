@@ -36,7 +36,7 @@ Stack: Python 3.11+, FastAPI, Uvicorn, Pydantic v2 / pydantic-settings, LangChai
 - Layout: `app/{main.py, api/routes/, core/, schemas/, services/, graph/, specialists/, llm/, db/, retrieval/, response/}`; `data/` holds the four JSON files; `scripts/` holds one-off scripts (run as `python -m scripts.<name>` from project root).
 - Config: `from app.core.config import get_settings` (cached `Settings`). Never call `os.getenv` or instantiate `Settings()` directly.
 - Schemas: Pydantic models in `app/schemas/`. `ChatRequest`, `ChatEnvelope`, `ChatResponseBody`, `ProductCard`, `ErrorInfo` already exist in `app/schemas/chat.py`.
-- `app/services/chat_service.py::handle_chat(request) -> ChatEnvelope` runs the LangGraph workflow (`app/graph/builder.py::get_graph`). The composer is still a `[STUB]` node until M4; specialists and clarification are real.
+- `app/services/chat_service.py::handle_chat(request) -> ChatEnvelope` runs the LangGraph workflow (`app/graph/builder.py::get_graph`). Graph: specialists -> composer -> validator (retry once) -> fallback; the response envelope is built in `app/response/envelope.py`.
 - Settings fields: `app_env, log_level, mistral_api_key, huggingface_api_key, database_url, chat_model, embedding_model, embedding_dimensions`.
 - Dependencies: `pip` + venv + `requirements.txt` (`pip freeze > requirements.txt` after installing). No Docker, no uv, no Poetry.
 

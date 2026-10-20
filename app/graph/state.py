@@ -25,5 +25,8 @@ class ChatState(TypedDict, total=False):
     sufficient: bool
     missing_field: str | None
     specialist_result: SpecialistOutput
+    composer_attempts: int                 # 1 = first composition, 2 = the single retry
+    validation_issues: list[str]           # critical issues from the last validation
+    valid: bool                            # the response may be sent as it is
     # final result (built by out_of_scope / clarification / composer)
     response: ChatResponseBody

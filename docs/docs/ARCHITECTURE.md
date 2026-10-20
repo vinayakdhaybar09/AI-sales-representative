@@ -84,6 +84,8 @@ Specialist `status`: `success | empty | error`. `warnings` carries things like "
 ## Validator
 **Critical (trigger retry):** response structure/type valid; tray product IDs, names, prices, image URLs, product URLs, availability match specialist output; tray ⊆ specialist products; comparison values match; support contact/policy values match.
 **Non-critical (log only):** Markdown quality, optional badges, optional source metadata, wording.
+Implemented checks (`app/response/validator.py`): type/structure, non-empty Markdown, no raw HTML/CSS markup, tray equals specialist products field by field (empty for non-recommendation), every ₹ amount / URL / email in the Markdown exists in the specialist data, a bolded catalog product not in the result, out-of-stock product without "Currently out of stock", customer-specific order claims. It is heuristic and cannot prove every sentence is grounded.
+Specialist `empty` results get a fixed reply (`app/response/empty_replies.py`, no LLM, no validation); `error` results go straight to `fallback`.
 
 ## Conversation state
 In-memory first (M2, `app/graph/memory_store.py`), moved to Postgres in M5. Pass only *relevant* recent history to the LLM, not everything. Expire inactive conversations after ~10–15 minutes (details in Phase 12).

@@ -2,8 +2,8 @@
 
 START -> session_loader -> query_understanding -> out_of_scope | sufficiency
 sufficiency -> clarification | specialist_<intent> -> composer
-out_of_scope / clarification / composer -> finalize -> END
-(Composer is a stub until M4, which also adds the validator, retry-once and fallback.)
+specialist -> composer -> (validator | finalize); validator -> finalize | composer (retry once) | fallback
+out_of_scope / clarification / fallback -> finalize -> END
 """
 
 from functools import lru_cache
@@ -13,6 +13,7 @@ from langgraph.graph import END, START, StateGraph
 from app.graph import routers
 from app.graph.nodes.clarification import clarification
 from app.graph.nodes.composer import composer
+from app.graph.nodes.fallback import fallback
 from app.graph.nodes.finalize import finalize
 from app.graph.nodes.out_of_scope import out_of_scope
 from app.graph.nodes.query_understanding import query_understanding
@@ -24,6 +25,7 @@ from app.graph.nodes.specialists import (
     specialist_support,
 )
 from app.graph.nodes.sufficiency import sufficiency
+from app.graph.nodes.validator import validator
 from app.graph.state import ChatState
 
 SPECIALISTS = {
@@ -46,6 +48,8 @@ def get_graph():
     for name, node in SPECIALISTS.items():
         g.add_node(name, node)
     g.add_node("composer", composer)
+    g.add_node("validator", validator)
+    g.add_node("fallback", fallback)
     g.add_node("finalize", finalize)
 
     g.add_edge(START, "session_loader")
@@ -60,7 +64,14 @@ def get_graph():
     )
     for name in SPECIALISTS:
         g.add_edge(name, "composer")
-    for name in ("out_of_scope", "clarification", "composer"):
+    g.add_conditional_edges(
+        "composer", routers.after_composer, {"validator": "validator", "finalize": "finalize"}
+    )
+    g.add_conditional_edges(
+        "validator", routers.after_validator,
+        {"finalize": "finalize", "composer": "composer", "fallback": "fallback"},
+    )
+    for name in ("out_of_scope", "clarification", "fallback"):
         g.add_edge(name, "finalize")
     g.add_edge("finalize", END)
     return g.compile()

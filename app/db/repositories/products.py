@@ -180,3 +180,9 @@ async def find_products_by_name(
         )
         rows = await cur.fetchall()
         return rows, ("contains" if rows else "none")
+
+
+async def get_all_product_names(conn: psycopg.AsyncConnection) -> list[str]:
+    """Every product name (used by the validator to spot mixed-up products)."""
+    cur = await conn.execute("SELECT name FROM products")
+    return [row[0] for row in await cur.fetchall()]

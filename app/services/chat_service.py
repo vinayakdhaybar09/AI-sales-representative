@@ -1,7 +1,8 @@
 import logging
 
 from app.graph.builder import get_graph
-from app.schemas.chat import ChatEnvelope, ChatRequest, ErrorInfo
+from app.response.envelope import error_envelope, success_envelope
+from app.schemas.chat import ChatEnvelope, ChatRequest
 
 logger = logging.getLogger(__name__)
 
@@ -22,20 +23,11 @@ async def handle_chat(request: ChatRequest) -> ChatEnvelope:
         state = await get_graph().ainvoke(
             {"conversation_id": request.conversation_id, "message": request.message}
         )
-        return ChatEnvelope(
-            success=True,
-            conversation_id=request.conversation_id,
-            response=state["response"],
-            error=None,
-        )
+        return success_envelope(request.conversation_id, state["response"])
     except Exception:
         logger.exception("Chat workflow failed (conversation_id=%s)", request.conversation_id)
-        return ChatEnvelope(
-            success=False,
-            conversation_id=request.conversation_id,
-            response=None,
-            error=ErrorInfo(
-                code="internal_error",
-                message="Something went wrong while processing your message. Please try again.",
-            ),
+        return error_envelope(
+            request.conversation_id,
+            "internal_error",
+            "Something went wrong while processing your message. Please try again.",
         )
