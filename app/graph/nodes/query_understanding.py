@@ -3,7 +3,7 @@ import logging
 from app.graph.state import ChatState
 from app.llm.models import get_chat_model
 from app.llm.prompts.query_understanding import build_messages
-from app.llm.retry import ainvoke_with_429_retry
+from app.llm.retry import ainvoke_with_retry
 from app.schemas.query import QueryUnderstanding
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ async def understand(
 ) -> QueryUnderstanding:
     """Ask the chat model for a structured reading of `message`."""
     model = get_chat_model().with_structured_output(QueryUnderstanding)
-    result = await ainvoke_with_429_retry(model, build_messages(message, history, pending))
+    result = await ainvoke_with_retry(model, build_messages(message, history, pending))
     if not isinstance(result, QueryUnderstanding):
         raise ValueError("Query Understanding returned no structured output")
     return result

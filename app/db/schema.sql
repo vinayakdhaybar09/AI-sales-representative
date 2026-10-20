@@ -47,3 +47,18 @@ CREATE TABLE IF NOT EXISTS embeddings (
 -- Index for cosine similarity search on embeddings (added here for reference;
 -- exact search is fine for MVP — enable IVFFlat/HNSW later if needed).
 -- CREATE INDEX ON embeddings USING hnsw (embedding vector_cosine_ops);
+
+
+-- ─── conversations ────────────────────────────────────────────────────────────
+-- One row per guest conversation_id. 'history' keeps the last few messages,
+-- 'previous_product_ids' the products shown last, 'pending_clarification' the
+-- open clarification (docs/CONTRACTS.md shape) or NULL. Rows idle longer than
+-- CONVERSATION_TTL_MINUTES are treated as expired and deleted.
+CREATE TABLE IF NOT EXISTS conversations (
+    conversation_id       TEXT        PRIMARY KEY,
+    history               JSONB       NOT NULL DEFAULT '[]',
+    previous_product_ids  JSONB       NOT NULL DEFAULT '[]',
+    pending_clarification JSONB,
+    updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS conversations_updated_at_idx ON conversations (updated_at);

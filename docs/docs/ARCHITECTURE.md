@@ -88,7 +88,7 @@ Implemented checks (`app/response/validator.py`): type/structure, non-empty Mark
 Specialist `empty` results get a fixed reply (`app/response/empty_replies.py`, no LLM, no validation); `error` results go straight to `fallback`.
 
 ## Conversation state
-In-memory first (M2, `app/graph/memory_store.py`), moved to Postgres in M5. Pass only *relevant* recent history to the LLM, not everything. Expire inactive conversations after ~10–15 minutes (details in Phase 12).
+Stored in Postgres (`conversations` table, `app/graph/conversation_store.py`). A conversation idle longer than `CONVERSATION_TTL_MINUTES` (default 15) is treated as new and deleted; a storage failure never blocks an answer. Pass only *relevant* recent history to the LLM, not everything. Expire inactive conversations after ~10–15 minutes (details in Phase 12).
 
 ## Out-of-scope / suggested prompts
 Suggested prompts come from a **small predefined list** of BSC questions (not freely generated). Out-of-scope shows 1–2 of them.

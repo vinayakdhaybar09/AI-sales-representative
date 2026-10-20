@@ -3,7 +3,7 @@ import logging
 from app.graph.state import ChatState
 from app.llm.models import get_chat_model
 from app.llm.prompts.composer import build_messages
-from app.llm.retry import ainvoke_with_429_retry
+from app.llm.retry import ainvoke_with_retry
 from app.response.empty_replies import empty_reply
 from app.response.envelope import fallback_body
 from app.response.tray import build_tray
@@ -33,7 +33,7 @@ async def composer(state: ChatState) -> dict:
     attempts = state.get("composer_attempts", 0) + 1
     previous = state["response"].markdown if attempts > 1 and "response" in state else None
     try:
-        reply = await ainvoke_with_429_retry(
+        reply = await ainvoke_with_retry(
             get_chat_model(),
             build_messages(state["search_text"], result, previous, state.get("validation_issues")),
         )

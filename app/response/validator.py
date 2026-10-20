@@ -28,6 +28,7 @@ _ORDER_CLAIM = re.compile(
     r"was (?:shipped|delivered|dispatched)|will arrive|arrives)\b",
     re.IGNORECASE,
 )
+_CONDITIONAL = re.compile(r"\b(?:if|once|when|whenever|after|until|as soon as|in case)\b", re.IGNORECASE)
 OUT_OF_STOCK_PHRASE = "currently out of stock"
 MAX_MARKDOWN_CHARS = 4000
 
@@ -44,6 +45,16 @@ class ValidationResult:
 
 def _float(text: str) -> float:
     return float(text.replace(",", ""))
+
+
+def _has_order_claim(markdown: str) -> bool:
+    """A statement about the customer's own order. General conditional guidance
+    ("once your order has been shipped, you will get an SMS") is allowed."""
+    for match in _ORDER_CLAIM.finditer(markdown):
+        sentence_start = max(markdown.rfind(c, 0, match.start()) for c in ".!?\n") + 1
+        if not _CONDITIONAL.search(markdown[sentence_start:match.start()]):
+            return True
+    return False
 
 
 def _clean_url(url: str) -> str:
@@ -140,7 +151,7 @@ def validate(
         out.critical.append("an out-of-stock product is mentioned without 'Currently out of stock'")
 
     # 8. no customer-specific order/refund/delivery claims (support has no live data)
-    if _ORDER_CLAIM.search(md):
+    if _has_order_claim(md):
         out.critical.append("makes a claim about the customer's own order/refund/delivery status")
 
     # 9. notes only

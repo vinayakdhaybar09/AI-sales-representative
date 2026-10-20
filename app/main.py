@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from app.api.error_handlers import register_error_handlers
 from app.api.routes import chat, health
 from app.core.config import get_settings
 from app.core.logging import setup_logging
@@ -28,10 +29,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="BSC AI Sales Representative",
-    version="0.3.0",
+    version="0.5.0",
     lifespan=lifespan
 )
 
+register_error_handlers(app)
 app.include_router(health.router)
 app.include_router(chat.router)
 

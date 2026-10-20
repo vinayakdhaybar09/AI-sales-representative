@@ -4,7 +4,7 @@ import re
 from app.graph.state import ChatState
 from app.llm.models import get_chat_model
 from app.llm.prompts.clarification import build_messages, fallback_question
-from app.llm.retry import ainvoke_with_429_retry
+from app.llm.retry import ainvoke_with_retry
 from app.schemas.chat import ChatResponseBody
 from app.schemas.query import Clarification
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 async def _ask_llm(original_query: str, intent: str, missing_field: str) -> str:
     model = get_chat_model().with_structured_output(Clarification)
-    result = await ainvoke_with_429_retry(model, build_messages(original_query, intent, missing_field))
+    result = await ainvoke_with_retry(model, build_messages(original_query, intent, missing_field))
     question = result.question.strip()
     # Exactly one question: cut anything after the first '?'.
     match = re.match(r"[^?]*\?", question)

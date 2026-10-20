@@ -11,8 +11,8 @@ Phases 1–4 are done. The remaining work is grouped into five milestones. Work 
 | M1 | Embeddings + vector search (old 5–6) | Verified |
 | M2 | Query Understanding + LangGraph skeleton, in-memory state (old 7–8) | Verified |
 | M3 | Sufficiency, clarification, out-of-scope, all four specialists (old 9–10) | Verified |
-| M4 | Composer, validator, retry-once, fallback, tray builder, real `handle_chat` (old 11) | In progress |
-| M5 | Conversation persistence, session expiry, error handling, retries, error envelope (old 12–13) | Not started |
+| M4 | Composer, validator, retry-once, fallback, tray builder, real `handle_chat` (old 11) | Verified |
+| M5 | Conversation persistence, session expiry, error handling, retries, error envelope (old 12–13) | In progress |
 
 ## Completed phase 4 (reference)
 Build: `app/db/connection.py` (async pool, opened/closed in `lifespan`), `app/db/schema.sql` (`CREATE EXTENSION vector`, `products`, `embeddings` tables), `app/db/repositories/products.py`, `scripts/ingest_products.py`, `/health` with a DB check.

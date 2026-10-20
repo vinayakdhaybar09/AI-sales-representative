@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     embedding_model: str = "mistral-embed"
     embedding_dimensions: int = 1024
 
+    # Conversations and request limits
+    conversation_ttl_minutes: float = 15      # idle time before a conversation expires
+    request_timeout_seconds: float = 60       # whole-request budget for one chat message
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()

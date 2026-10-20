@@ -27,7 +27,7 @@ Response envelope (always these four keys):
 - `type` ∈ `recommendation | comparison | knowledge | support | clarification | out_of_scope | fallback`.
 - `availability` ∈ `in_stock | out_of_stock` (a deliberate addition to the original design doc).
 - Non-recommendation responses: `product_tray` is `[]`.
-- Failure: `{"success": false, "conversation_id": "...", "response": null, "error": {"code": "...", "message": "..."}}` (Phase 13; convert FastAPI's default 422 shape to this too).
+- Failure: `{"success": false, "conversation_id": "...", "response": null, "error": {"code": "...", "message": "..."}}` for every `/api/*` failure, including 422 (`conversation_id` is `""` if the body had none). HTTP status follows the code: `invalid_request` 422, `rate_limited` 429, `internal_error` 500, `upstream_unavailable` 503, `service_unavailable` 503, `upstream_timeout` 504. Messages are client-safe (no traces, keys or internals).
 - `GET /health` → `{"status":"ok","service":"bsc-backend"}`.
 
 Fallback response body:

@@ -58,10 +58,14 @@ source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload                 # run API (restart manually after editing .env)
 python -m scripts.check_config                # show what settings the app sees
+python -m scripts.apply_schema                # create/update tables (idempotent; run after pulling schema changes)
 curl http://127.0.0.1:8000/health
 curl -s -X POST http://127.0.0.1:8000/api/chat -H "Content-Type: application/json" \
   -d '{"message":"Suggest a razor for sensitive skin","conversation_id":"guest_1"}'
 ```
+
+## Switching keys / models
+Settings and models are cached at startup: after editing `.env` (`MISTRAL_API_KEY`, `CHAT_MODEL`, `DATABASE_URL`) **restart uvicorn**. Changing `EMBEDDING_MODEL`/dimensions means re-running `python -m scripts.ingest_embeddings --force` (the table is `vector(1024)`). A Hugging Face fallback is not wired up. If the free tier returns 401/403/429 the API answers with a clean `service_unavailable`/`rate_limited` error envelope.
 
 ## Out of scope for the MVP (do not build)
 Other languages, streaming, logins/long-term user history, live order or inventory APIs, tracing/observability, advanced test suites, data cleaning, an internal API layer between backend and DB.

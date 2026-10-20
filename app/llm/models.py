@@ -35,9 +35,9 @@ def get_embeddings() -> MistralAIEmbeddings:
     return MistralAIEmbeddings(
         model=settings.embedding_model,
         api_key=settings.mistral_api_key,
-        max_retries=5,
-        wait_time=20,
-        timeout=60,
+        max_retries=3,
+        wait_time=5,        # seconds between retries after a 429
+        timeout=30,
         max_concurrent_requests=2,
     )
 
@@ -55,6 +55,6 @@ def get_chat_model() -> ChatMistralAI:
         model=settings.chat_model,
         api_key=settings.mistral_api_key,
         temperature=0,
-        max_retries=2,
-        timeout=60,
+        max_retries=2,      # network errors only; HTTP 429/5xx are handled in app/llm/retry.py
+        timeout=30,
     )

@@ -23,6 +23,10 @@ from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 
+class DatabaseNotReadyError(RuntimeError):
+    """The connection pool is missing (no DATABASE_URL or startup failed)."""
+
+
 # Module-level singleton; set by open_pool(), cleared by close_pool().
 _pool: AsyncConnectionPool | None = None
 
@@ -57,7 +61,8 @@ async def open_pool() -> None:
         configure=_configure_conn,
         # Autocommit: reads must not sit 'idle in transaction' while we wait on
         # the embedding API (Neon closes such connections).
-        kwargs={"autocommit": True},
+        kwargs={"autocommit": True, "connect_timeout": 10},
+        timeout=10.0,   # max wait for a free connection before PoolTimeout (fail fast)
         # Do NOT pass open=True here (deprecated in psycopg-pool 3.x).
         # open() is called explicitly below.
         open=False,
@@ -82,7 +87,7 @@ def get_pool() -> AsyncConnectionPool:
     missing — this is the intended 'fail at first DB use' behaviour.
     """
     if _pool is None:
-        raise RuntimeError(
+        raise DatabaseNotReadyError(
             "Database pool is not initialised. "
             "Ensure DATABASE_URL is set and the server has started up correctly."
         )

@@ -54,6 +54,7 @@ def cases():
     yield "tray on support", body("support", "Hi", tray), SUP, "tray has"
     yield "good support", body("support", "Track: https://track.example/x . Email care@bombayshavingcompany.com. Fee ₹99.", []), SUP, None
     yield "invented email", body("support", "Email help@bombayshavingcompany.com", []), SUP, "email"
+    yield "conditional guidance is not an order claim", body("support", "Once your order has been shipped, you will get an SMS. If your order is delayed, email care@bombayshavingcompany.com.", []), SUP, None
     yield "order claim", body("support", "Your order has been shipped and is on its way.", []), SUP, "order"
 
 
@@ -68,7 +69,6 @@ def part_a() -> bool:
 
 
 async def part_b() -> bool:
-    from app.graph import memory_store
     from app.graph.builder import get_graph
     import app.graph.nodes.composer as composer_module
     from app.db.connection import close_pool, open_pool
@@ -79,9 +79,11 @@ async def part_b() -> bool:
         calls.append(messages)
         return SimpleNamespace(content="Buy **Totally Fake Razor** for ₹1 at https://evil.example/x")
 
-    composer_module.ainvoke_with_429_retry = bad_llm
-    memory_store.clear()
+    composer_module.ainvoke_with_retry = bad_llm
     await open_pool()
+    from app.db.connection import get_pool
+    async with get_pool().connection() as c:   # start from a fresh conversation
+        await c.execute("DELETE FROM conversations WHERE conversation_id = %s", ("check_b",))
     try:
         state = await get_graph().ainvoke({"conversation_id": "check_b", "message": "Suggest a razor for sensitive skin"})
     finally:
