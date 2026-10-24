@@ -63,6 +63,11 @@ async def open_pool() -> None:
         # the embedding API (Neon closes such connections).
         kwargs={"autocommit": True, "connect_timeout": 10},
         timeout=10.0,   # max wait for a free connection before PoolTimeout (fail fast)
+        # Neon silently drops idle connections. Check a connection is alive before
+        # handing it out (a cheap round trip) and retire idle ones before Neon does,
+        # so the first request after a quiet period does not hit a dead connection.
+        check=AsyncConnectionPool.check_connection,
+        max_idle=240.0,
         # Do NOT pass open=True here (deprecated in psycopg-pool 3.x).
         # open() is called explicitly below.
         open=False,
