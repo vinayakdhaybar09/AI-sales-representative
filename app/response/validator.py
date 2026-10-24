@@ -13,6 +13,7 @@ import json
 import re
 from dataclasses import dataclass, field
 
+from app.response.tray import card_extras
 from app.schemas.chat import ChatResponseBody
 from app.schemas.specialist import SpecialistOutput
 
@@ -81,6 +82,10 @@ def _check_tray(response: ChatResponseBody, result: SpecialistOutput, out: Valid
             problems.append("product_url")
         if card.availability != product["availability"]:
             problems.append("availability")
+        extras = card_extras(product)
+        for key, value in extras.items():
+            if getattr(card, key) != value:
+                problems.append(key)
         if problems:
             out.critical.append(f"tray card '{card.name}' differs from specialist data: {', '.join(problems)}")
 

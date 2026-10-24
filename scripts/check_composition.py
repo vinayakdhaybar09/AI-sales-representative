@@ -4,7 +4,7 @@ Usage:  python -m scripts.check_composition
 
 Part A (offline, no LLM/DB): good and bad responses against fake specialist data;
         every critical rule must trigger, a good response must pass.
-Part B (needs DB + Mistral for Query Understanding): the Composer LLM is replaced by a
+Part B (needs DB + the chat model for Query Understanding; the specialist is faked): the Composer LLM is replaced by a
         stub that always returns a bad answer; the graph must compose exactly twice
         (one retry) and then return the `fallback` response.
 """
@@ -20,9 +20,11 @@ from app.schemas.specialist import SpecialistOutput
 
 PRODUCTS = [
     {"id": "1", "name": "Alpha Razor", "price": 99.0, "availability": "in_stock",
-     "url": "https://shop.example/alpha", "image_url": "https://img.example/alpha.webp", "details": {}},
+     "url": "https://shop.example/alpha", "image_url": "https://img.example/alpha.webp", "details": {},
+     "rating": 4.5, "review_count": 120, "original_price": 149.0},
     {"id": "2", "name": "Beta Foam, 50g", "price": 49.0, "availability": "out_of_stock",
-     "url": "https://shop.example/beta", "image_url": "https://img.example/beta.webp", "details": {}},
+     "url": "https://shop.example/beta", "image_url": "https://img.example/beta.webp", "details": {},
+     "rating": 0.0, "review_count": 0, "original_price": 49.0},
 ]
 REC = SpecialistOutput(specialist="recommendation", status="success", data={"products": PRODUCTS})
 SUP = SpecialistOutput(
@@ -41,11 +43,13 @@ def cases():
     tray = build_tray(REC)
     good = "Try **Alpha Razor** at ₹99 or **Beta Foam, 50g** at ₹49 (Currently out of stock)."
     yield "good recommendation", body("recommendation", good, tray), REC, None
-    yield "invented price", body("recommendation", good.replace("₹99", "₹149"), tray), REC, "amount"
+    yield "invented price", body("recommendation", good.replace("₹99", "₹777"), tray), REC, "amount"
     yield "invented URL", body("recommendation", good + " See https://fake.example/p", tray), REC, "URL"
     yield "missing out-of-stock wording", body("recommendation", good.replace("(Currently out of stock)", ""), tray), REC, "out-of-stock"
     yield "product not in result", body("recommendation", good + " Also **Gamma Trimmer**.", tray), REC, "not in the specialist result"
     yield "tray price tampered", body("recommendation", good, [tray[0].model_copy(update={"price": 1.0}), tray[1]]), REC, "differs"
+    yield "tray rating tampered", body("recommendation", good, [tray[0].model_copy(update={"rating": 1.0}), tray[1]]), REC, "rating"
+    yield "tray discount invented", body("recommendation", good, [tray[0], tray[1].model_copy(update={"original_price": 99.0})]), REC, "original_price"
     yield "tray has extra product", body("recommendation", good, tray + [tray[0]]), REC, "tray has"
     yield "tray missing", body("recommendation", good, []), REC, "tray has"
     yield "wrong type", body("knowledge", good, tray), REC, "does not match"
@@ -60,6 +64,11 @@ def cases():
 
 def part_a() -> bool:
     ok = True
+    tray = build_tray(REC)
+    shape_ok = (tray[0].rating == 4.5 and tray[0].review_count == 120 and tray[0].original_price == 149.0
+                and tray[1].rating is None and tray[1].review_count is None and tray[1].original_price is None)
+    ok &= shape_ok
+    print(f"  [{'PASS' if shape_ok else 'FAIL'}] tray extras: rating/reviews null for 0 reviews, original_price only for a discount")
     for name, response, result, expect in cases():
         check = validate(response, result, CATALOG)
         passed = check.valid if expect is None else any(expect in c for c in check.critical)
@@ -80,6 +89,14 @@ async def part_b() -> bool:
         return SimpleNamespace(content="Buy **Totally Fake Razor** for ₹1 at https://evil.example/x")
 
     composer_module.ainvoke_with_retry = bad_llm
+
+    # Fixed specialist data, so this test does not depend on live embedding search.
+    import app.specialists.recommendation as recommendation_module
+
+    async def fixed_specialist(_conn, _query, _search_text):
+        return REC
+
+    recommendation_module.run = fixed_specialist
     await open_pool()
     from app.db.connection import get_pool
     async with get_pool().connection() as c:   # start from a fresh conversation

@@ -30,6 +30,10 @@ class ProductCard(BaseModel):
     image_url: str
     product_url: str
     availability: Availability
+    # Optional extras straight from the products table (null when not meaningful):
+    rating: float | None = None            # null when the product has no reviews
+    review_count: int | None = None        # null when the product has no reviews
+    original_price: float | None = None    # only set when higher than price (a real discount)
 
 class ChatResponseBody(BaseModel):
     """The 'response' part of the envelope."""

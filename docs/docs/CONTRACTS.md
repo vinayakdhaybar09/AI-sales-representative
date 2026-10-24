@@ -17,7 +17,8 @@ Response envelope (always these four keys):
     "markdown": "...",
     "product_tray": [
       { "product_id": "8447139315866", "name": "...", "price": 450.0,
-        "image_url": "https://...", "product_url": "https://...", "availability": "in_stock" }
+        "image_url": "https://...", "product_url": "https://...", "availability": "in_stock",
+        "rating": 4.79, "review_count": 202, "original_price": 149.0 }
     ],
     "suggested_prompts": []
   },
@@ -26,6 +27,7 @@ Response envelope (always these four keys):
 ```
 - `type` ∈ `recommendation | comparison | knowledge | support | clarification | out_of_scope | fallback`.
 - `availability` ∈ `in_stock | out_of_stock` (a deliberate addition to the original design doc).
+- `rating`, `review_count`, `original_price` on tray cards are optional (null): rating/review_count are null when the product has no reviews (never 0.0); `original_price` is set only when higher than `price`. All come from the `products` table.
 - Non-recommendation responses: `product_tray` is `[]`.
 - Failure: `{"success": false, "conversation_id": "...", "response": null, "error": {"code": "...", "message": "..."}}` for every `/api/*` failure, including 422 (`conversation_id` is `""` if the body had none). HTTP status follows the code: `invalid_request` 422, `rate_limited` 429, `internal_error` 500, `upstream_unavailable` 503, `service_unavailable` 503, `upstream_timeout` 504. Messages are client-safe (no traces, keys or internals).
 - `GET /health` → `{"status":"ok","service":"bsc-backend"}`.
