@@ -7,6 +7,7 @@ SecretStr for `api_key`, so the raw value is never unwrapped in our code.
 import logging
 from functools import lru_cache
 
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_mistralai import ChatMistralAI, MistralAIEmbeddings
 
 from app.core.config import get_settings
@@ -43,9 +44,26 @@ def get_embeddings() -> MistralAIEmbeddings:
 
 
 @lru_cache
-def get_chat_model() -> ChatMistralAI:
-    """Return the shared Mistral chat model (temperature 0: we extract, not create)."""
+def get_chat_model() -> BaseChatModel:
+    """Return the shared chat model (temperature 0: we extract, not create).
+
+    CHAT_MODEL starting with "gemini" selects Google Gemini; anything else is a Mistral model.
+    Only the chat model can be Gemini; embeddings stay on Mistral (the stored vectors depend on it).
+    """
     settings = get_settings()
+    if settings.chat_model.startswith("gemini"):
+        if settings.gemini_api_key is None:
+            raise MissingApiKeyError("GEMINI_API_KEY is not set. Add it to .env and restart.")
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
+        logger.info("Building chat model (provider=gemini, model=%s)", settings.chat_model)
+        return ChatGoogleGenerativeAI(
+            model=settings.chat_model,
+            api_key=settings.gemini_api_key,
+            temperature=0,
+            max_retries=2,
+            timeout=30,
+        )
     if settings.mistral_api_key is None:
         raise MissingApiKeyError(
             "MISTRAL_API_KEY is not set. Add it to .env and restart."

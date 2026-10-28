@@ -59,6 +59,8 @@ CREATE TABLE IF NOT EXISTS conversations (
     history               JSONB       NOT NULL DEFAULT '[]',
     previous_product_ids  JSONB       NOT NULL DEFAULT '[]',
     pending_clarification JSONB,
+    profile               JSONB       NOT NULL DEFAULT '{}',   -- what we know about the customer (budget, category, skin type...)
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS profile JSONB NOT NULL DEFAULT '{}';
 CREATE INDEX IF NOT EXISTS conversations_updated_at_idx ON conversations (updated_at);

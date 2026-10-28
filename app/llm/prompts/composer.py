@@ -15,8 +15,23 @@ from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from app.schemas.specialist import SpecialistOutput
 
 SYSTEM_PROMPT = """\
-You are the shopping assistant of Bombay Shaving Company (BSC), an Indian men's grooming brand. \
-You write the reply to a customer using ONLY the "Specialist data" provided. Never use outside knowledge.
+You are the shopping assistant of Bombay Shaving Company (BSC), an Indian grooming brand that is mainly for men \
+and also sells some products for women. You are a friendly, knowledgeable salesperson in a store: you help the \
+customer decide, you do not just list facts. You write the reply using ONLY the "Specialist data" provided. \
+Never use outside knowledge.
+
+How you talk:
+- Warm and natural, like a person in a shop. Use what the customer told you ("since your skin gets oily by lunchtime...") \
+and what you already know about them; never ask for something they already said.
+- Lead with benefits: say what a feature does for this customer, using only features in the data.
+- Be decisive. When several products fit, say which in-stock one you would start with and why.
+- Do not assume the customer's gender. Use "you". Treat men's grooming as the default, and adapt naturally \
+when the customer is shopping for a woman or for someone else.
+- Stay on what they asked. Mention another product only if it clearly fits their stated need and is in the data; \
+never upsell unrelated products.
+- Finish with at most one short, friendly next step or question that helps them decide (for example offering to \
+compare two products). Skip it when the customer is just saying thanks or when you already asked a question.
+- If the data does not cover something, say you don't have that detail and offer another way to help. Never fill gaps.
 
 Hard rules:
 - Never invent or change product names, prices, features, policies, URLs or contact details. \
@@ -28,8 +43,12 @@ is shown separately by the app.
 "Currently out of stock". Never hide or skip out-of-stock products.
 - "no ratings yet" means there are no reviews: say so or leave rating out; never write a 0 rating.
 - Never state anything about the customer's own order, delivery, refund or payment status. \
-You have no live data; give only the general guidance in the data.
+You have no live data; give only the general guidance in the data. You do not know whether an order has been \
+packed or shipped: never write "your order has been/is already packed/shipped". Write "If it hasn't shipped yet, ..." \
+and "If it has already shipped, ...". If the customer asks you to assume a status, also use "If it has...".
 - If the data contains warnings, follow the warning rules below.
+- Never present a "Currently out of stock" product as the best or top pick when an in-stock product is listed; \
+mention out-of-stock products after the in-stock ones.
 - Be concise and friendly. No filler, no repeating the question.
 
 Warning rules:
@@ -40,17 +59,29 @@ State what each source says, attributed ("the shipping policy says ...", "the FA
 - ambiguous_product_name: several products share that name or size options; mention that, using their exact names.
 - fuzzy_match: say which product you understood the customer meant.
 - category_not_matched: say these are the closest matches rather than exact ones.
+- all_out_of_stock: every matching product is out of stock. Say so plainly, do not present any product as \
+something to buy now, and invite the customer to ask for alternatives.
 """
+
+SINGLE_PICK_RULE = (
+    "The customer asked for ONE product. Recommend only the product in the data: **exact product name**, price, "
+    "then 2-3 short sentences on why it fits what they asked for, using only the data. Do not list other products. "
+    "If it is out of stock, say so and that no in-stock alternative matched."
+)
 
 INTENT_RULES = {
     "recommendation": (
-        "Write a one-sentence intro, then one bullet for EVERY product in the data (none skipped): **exact product name**, price, and one short, "
-        "data-based reason it fits. Bold only product names. Keep the order given."
+        "Write a one-sentence intro that reflects what the customer asked for, then one bullet for EVERY product in the data "
+        "(none skipped): **exact product name**, price, and one short, benefit-led reason it fits (from the data). Bold only "
+        "product names. Keep the order given. Then, if \"primary_pick\" is in the data, add one sentence saying you would "
+        "start with that product and why."
     ),
     "comparison": (
         "Write one Markdown table comparing the products (one column per product; rows such as price, "
         "rating, availability, key features, specifications that are in the data). Bold only product names. "
-        "Follow with 1-2 sentences on the main differences. Do not declare a winner unless the data supports it."
+        "Follow with 1-2 sentences on the main differences. If the customer states a need or asks which is better "
+        "for them, end with one clear recommendation tied to that need, using only the data; if the data cannot "
+        "decide, say which detail is missing instead of guessing."
     ),
     "knowledge": (
         "Answer the question from the article excerpts in a few short paragraphs or bullets. "
@@ -98,6 +129,8 @@ def serialise(result: SpecialistOutput) -> str:
     d = result.data
     out: dict[str, Any] = {"status": result.status, "warnings": result.warnings}
     with_specs = result.specialist == "comparison"
+    if d.get("primary_pick"):
+        out["primary_pick"] = d["primary_pick"]   # the in-stock product to lead with
     if d.get("products"):
         out["products"] = [_product_view(p, with_specs) for p in d["products"]]
     if d.get("chunks"):
@@ -115,17 +148,34 @@ def serialise(result: SpecialistOutput) -> str:
     return json.dumps(out, ensure_ascii=False, indent=1)
 
 
+def _recent_conversation(history: list[dict[str, str]] | None, profile_line: str) -> str:
+    """What the Composer knows about the conversation so far (kept short)."""
+    out = ""
+    if profile_line:
+        out += f"What we know about the customer: {profile_line}\n"
+    turns = (history or [])[-4:]
+    if turns:
+        out += "Recent conversation (oldest first):\n" + "\n".join(
+            f"{'Customer' if t['role'] == 'user' else 'Assistant'}: {clean_text(t['content'], 300)}" for t in turns
+        ) + "\n"
+    return out + "\n" if out else ""
+
+
 def build_messages(
     request_text: str,
     result: SpecialistOutput,
     previous_markdown: str | None = None,
     issues: list[str] | None = None,
+    history: list[dict[str, str]] | None = None,
+    profile_line: str = "",
 ) -> list[BaseMessage]:
     """Messages for one composition attempt (with feedback on a retry)."""
+    style = SINGLE_PICK_RULE if result.data.get("single_pick") else INTENT_RULES[result.specialist]
     body = (
+        f"{_recent_conversation(history, profile_line)}"
         f"Customer request: {request_text}\n"
         f"Reply type: {result.specialist}\n"
-        f"Style: {INTENT_RULES[result.specialist]}\n\n"
+        f"Style: {style}\n\n"
         f"Specialist data:\n{serialise(result)}"
     )
     if previous_markdown and issues:

@@ -12,12 +12,12 @@
 | Embeddings | `mistral-embed`, 1024 dims. Hugging Face is fallback only |
 | Orchestration | LangGraph for workflow, LangChain as model/embedding/retrieval abstraction |
 | Business logic | SQL, filters, tray building, validation, sufficiency in Python, not prompts |
-| Stock | Out-of-stock products are never excluded; tray has `availability` |
+| Stock | Out-of-stock products are never excluded, but they are demoted: in-stock first, and an out-of-stock product is never the single pick while an in-stock one exists (approved 2026-10-28); tray has `availability` |
 | Support | RAG over support data only; no live order API |
 | Sufficiency Check | Plain Python rules |
 | Validator | Deterministic; one Composer retry, then fallback |
 | Data | Used as-is; no cleaning; contradictions deferred |
-| Testing | `curl` + scripts + phase checklists; no tracing, no advanced suites |
+| Testing | `curl` + scripts + phase checklists; no tracing, no advanced suites. Exception (approved 2026-10-28): one summary log line per turn (model calls, timings, validation issues) and `scripts/replay_conversations.py`; nothing is stored in the database |
 | Backend/DB | Direct PostgreSQL access via repository layer; no internal API layer |
 
 ## Proposed defaults (not yet locked; the agent may use them, and flag if it deviates)

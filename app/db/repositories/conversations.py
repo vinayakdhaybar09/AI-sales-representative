@@ -17,7 +17,7 @@ async def get_conversation(
     async with conn.cursor(row_factory=dict_row) as cur:
         await cur.execute(
             """
-            SELECT history, previous_product_ids, pending_clarification,
+            SELECT history, previous_product_ids, pending_clarification, profile,
                    updated_at < now() - interval '1 minute' * %s AS expired
             FROM conversations WHERE conversation_id = %s
             """,
@@ -38,17 +38,19 @@ async def upsert_conversation(
     history: list[dict[str, str]],
     previous_product_ids: list[str],
     pending_clarification: dict[str, Any] | None,
+    profile: dict[str, Any],
 ) -> None:
     """Insert or update a conversation and refresh its idle timer."""
     await conn.execute(
         """
         INSERT INTO conversations
-            (conversation_id, history, previous_product_ids, pending_clarification, updated_at)
-        VALUES (%s, %s, %s, %s, now())
+            (conversation_id, history, previous_product_ids, pending_clarification, profile, updated_at)
+        VALUES (%s, %s, %s, %s, %s, now())
         ON CONFLICT (conversation_id) DO UPDATE SET
             history               = EXCLUDED.history,
             previous_product_ids  = EXCLUDED.previous_product_ids,
             pending_clarification = EXCLUDED.pending_clarification,
+            profile               = EXCLUDED.profile,
             updated_at            = now()
         """,
         (
@@ -56,6 +58,7 @@ async def upsert_conversation(
             Jsonb(history),
             Jsonb(previous_product_ids),
             Jsonb(pending_clarification) if pending_clarification is not None else None,
+            Jsonb(profile),
         ),
     )
 

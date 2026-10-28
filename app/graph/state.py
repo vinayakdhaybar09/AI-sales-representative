@@ -18,9 +18,11 @@ class ChatState(TypedDict, total=False):
     history: list[dict[str, str]]          # [{"role": "user"|"assistant", "content": ...}]
     previous_product_ids: list[str]        # product IDs shown earlier in this conversation
     pending_clarification: dict[str, Any] | None   # docs/CONTRACTS.md shape
+    profile: dict[str, Any]                # what we know about the customer, carried across turns
     # produced along the way
     query: QueryUnderstanding
     pending_resolved: bool                 # this message answered a pending clarification
+    pending_before: dict[str, Any] | None  # the clarification that was open when this turn began
     search_text: str                       # text used for retrieval (original + answer when resuming)
     sufficient: bool
     missing_field: str | None

@@ -1,6 +1,6 @@
 from functools import lru_cache
 from typing import Literal
-from pydantic import SecretStr
+from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,6 +18,10 @@ class Settings(BaseSettings):
 
     # Secrets (optional for now; required by the phase that first uses them)
     mistral_api_key: SecretStr | None = None
+    # Used when CHAT_MODEL starts with "gemini". GEMINI_API_KEY is the standard name; GEMINI_NEW_KEY is accepted too.
+    gemini_api_key: SecretStr | None = Field(
+        default=None, validation_alias=AliasChoices("GEMINI_API_KEY", "GEMINI_NEW_KEY")
+    )
     huggingface_api_key: SecretStr | None = None
     database_url: SecretStr | None = None
 

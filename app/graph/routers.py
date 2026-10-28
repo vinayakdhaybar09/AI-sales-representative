@@ -4,9 +4,11 @@ from app.graph.state import ChatState
 
 
 def after_query_understanding(state: ChatState) -> str:
-    """Out-of-scope messages skip everything and get a polite decline."""
+    """Out-of-scope messages get a polite decline; greetings and thanks a warm fixed reply."""
     if state["query"].scope == "out_of_scope":
         return "out_of_scope"
+    if state["query"].context.smalltalk and not state.get("pending_resolved"):
+        return "greeting"
     return "sufficiency"
 
 

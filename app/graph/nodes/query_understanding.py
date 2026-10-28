@@ -1,10 +1,12 @@
 import logging
 
+from app.graph.profile import apply_profile, detect_audience, update_profile
 from app.graph.state import ChatState
 from app.llm.models import get_chat_model
 from app.llm.prompts.query_understanding import build_messages
 from app.llm.retry import ainvoke_with_retry
 from app.schemas.query import QueryUnderstanding
+from app.specialists.products import normalize_gender
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +18,7 @@ async def understand(
 ) -> QueryUnderstanding:
     """Ask the chat model for a structured reading of `message`."""
     model = get_chat_model().with_structured_output(QueryUnderstanding)
-    result = await ainvoke_with_retry(model, build_messages(message, history, pending))
+    result = await ainvoke_with_retry(model, build_messages(message, history, pending), "query_understanding")
     if not isinstance(result, QueryUnderstanding):
         raise ValueError("Query Understanding returned no structured output")
     return result
@@ -42,6 +44,17 @@ async def query_understanding(state: ChatState) -> dict:
         query.intent = pending["intent"]  # an answer never changes the original intent
         search_text = f"{pending['original_query']}. {state['message']}"
 
+    # Who it is for: explicit words decide; the model's 'men' guess is ignored (men's products are the default).
+    audience = detect_audience(state["message"])
+    if audience:
+        query.filters.gender = audience
+    elif normalize_gender(query.filters.gender) != "women":
+        query.filters.gender = None
+
+    # Fill what a short follow-up left out (category, budget, skin type, audience) from earlier turns.
+    profile = state.get("profile") or {}
+    apply_profile(query, profile)
+
     logger.info(
         "Query understood (conversation_id=%s, intent=%s, scope=%s, resumed=%s)",
         state["conversation_id"], query.intent, query.scope, resolved,
@@ -49,6 +62,8 @@ async def query_understanding(state: ChatState) -> dict:
     return {
         "query": query,
         "pending_resolved": resolved,
+        "pending_before": pending,
         "search_text": search_text,
+        "profile": update_profile(profile, query),
         "pending_clarification": None,   # settled either way; clarification may set a new one
     }

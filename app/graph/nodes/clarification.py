@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 async def _ask_llm(original_query: str, intent: str, missing_field: str) -> str:
     model = get_chat_model().with_structured_output(Clarification)
-    result = await ainvoke_with_retry(model, build_messages(original_query, intent, missing_field))
+    result = await ainvoke_with_retry(model, build_messages(original_query, intent, missing_field), "clarification")
     question = result.question.strip()
     # Exactly one question: cut anything after the first '?'.
     match = re.match(r"[^?]*\?", question)

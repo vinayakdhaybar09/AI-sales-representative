@@ -1,9 +1,9 @@
 """app/graph/builder.py — wires the workflow (matches docs/ARCHITECTURE.md).
 
-START -> session_loader -> query_understanding -> out_of_scope | sufficiency
+START -> session_loader -> query_understanding -> out_of_scope | greeting | sufficiency
 sufficiency -> clarification | specialist_<intent> -> composer
 specialist -> composer -> (validator | finalize); validator -> finalize | composer (retry once) | fallback
-out_of_scope / clarification / fallback -> finalize -> END
+out_of_scope / greeting / clarification / fallback -> finalize -> END
 """
 
 from functools import lru_cache
@@ -15,6 +15,7 @@ from app.graph.nodes.clarification import clarification
 from app.graph.nodes.composer import composer
 from app.graph.nodes.fallback import fallback
 from app.graph.nodes.finalize import finalize
+from app.graph.nodes.greeting import greeting
 from app.graph.nodes.out_of_scope import out_of_scope
 from app.graph.nodes.query_understanding import query_understanding
 from app.graph.nodes.session_loader import session_loader
@@ -43,6 +44,7 @@ def get_graph():
     g.add_node("session_loader", session_loader)
     g.add_node("query_understanding", query_understanding)
     g.add_node("out_of_scope", out_of_scope)
+    g.add_node("greeting", greeting)
     g.add_node("sufficiency", sufficiency)
     g.add_node("clarification", clarification)
     for name, node in SPECIALISTS.items():
@@ -56,7 +58,7 @@ def get_graph():
     g.add_edge("session_loader", "query_understanding")
     g.add_conditional_edges(
         "query_understanding", routers.after_query_understanding,
-        {"out_of_scope": "out_of_scope", "sufficiency": "sufficiency"},
+        {"out_of_scope": "out_of_scope", "greeting": "greeting", "sufficiency": "sufficiency"},
     )
     g.add_conditional_edges(
         "sufficiency", routers.after_sufficiency,
@@ -71,7 +73,7 @@ def get_graph():
         "validator", routers.after_validator,
         {"finalize": "finalize", "composer": "composer", "fallback": "fallback"},
     )
-    for name in ("out_of_scope", "clarification", "fallback"):
+    for name in ("out_of_scope", "greeting", "clarification", "fallback"):
         g.add_edge(name, "finalize")
     g.add_edge("finalize", END)
     return g.compile()

@@ -1,0 +1,280 @@
+[
+ {
+  "title": "A personal-care gift for someone else",
+  "turns": [
+   "I want to buy a grooming gift for my brother's birthday.",
+   "He's in his twenties, keeps a short beard, and likes smelling fresh.",
+   "My budget is around ₹1,500.",
+   "Should I get a fragrance, a grooming kit, or a combination of smaller products?",
+   "Can you recommend something that feels like a proper gift rather than a random collection of items?",
+   "I'd prefer something useful for everyday use.",
+   "Can you narrow it down to your best option and explain why it suits him?"
+  ]
+ },
+ {
+  "title": "A vague request that needs clarification",
+  "turns": [
+   "Suggest a good product for me.",
+   "Something for grooming.",
+   "Probably a trimmer.",
+   "I want to use it for my beard and body.",
+   "Under ₹2,000.",
+   "I have sensitive skin, so I want something safe and easy to maintain.",
+   "Can you recommend one now, or do you still need to know something important?"
+  ]
+ },
+ {
+  "title": "Answering a clarification versus starting a new request",
+  "turns": [
+   "Can you recommend a trimmer?",
+   "I want it mainly for body grooming.",
+   "My budget is ₹1,000.",
+   "Actually, leave the trimmer for now. I need a face wash for oily skin.",
+   "Something under ₹200.",
+   "Can you recommend one?"
+  ]
+ },
+ {
+  "title": "Beard growth expectations and uncertainty",
+  "turns": [
+   "hi",
+   "I've got a patchy beard. Which product will grow hair in the empty areas the fastest?",
+   "I need visible results in three weeks because I have a wedding coming up.",
+   "If I use twice as much product, will it work faster?",
+   "Can you guarantee that the patches will fill in?",
+   "If products can't guarantee growth, what can I realistically do before the wedding?"
+  ]
+ },
+ {
+  "title": "Beard styling versus beard growth",
+  "turns": [
+   "Hi, I want my beard to look fuller, but I don't know if I need a growth product or just better grooming.",
+   "The hair grows unevenly around my cheeks, but my moustache and chin are pretty dense.",
+   "Would a beard growth product help, or should I focus on styling it differently?",
+   "Can you recommend something that helps me shape the cheek lines and neckline too?",
+   "Would the Beard Styling Pen work for that?",
+   "Can I use the styling tool and beard oil together, or should I choose just one?",
+   "I don't want to buy things I won't really need. What would you start with?"
+  ]
+ },
+ {
+  "title": "Cancellation and refund",
+  "turns": [
+   "I placed an order this morning, but I accidentally chose the wrong product.",
+   "Can I cancel it?",
+   "How do I know whether it's already packed or shipped?",
+   "Let's say it has already been shipped. What can I do then?",
+   "I paid online. Will I get my money back, and how long will it take?",
+   "What if I had chosen Cash on Delivery instead?",
+   "Can you give me the correct contact details to request cancellation?"
+  ]
+ },
+ {
+  "title": "Changing the buying criteria midway",
+  "turns": [
+   "Recommend a trimmer for under ₹1,500.",
+   "for beard gromming\nActually, I can spend up to ₹2,500 if it will last longer.",
+   "for beard grooming",
+   "I don't care about the digital display anymore. I'd rather have something easy to clean.",
+   "I also want to use it for body grooming.",
+   "Does your original recommendation still make sense?",
+   "Can you reconsider the options using my updated preferences?",
+   "Give me your final pick and explain why it beats the alternatives for my needs."
+  ]
+ },
+ {
+  "title": "Choosing a trimmer by features versus price",
+  "turns": [
+   "I'm comparing two trimmers and want help deciding which is better value.",
+   "take any you best selling trimers",
+   "any 2 from BSC",
+   "full body trimmer and 12 in 1",
+   "One is cheaper, but the other has more attachments and a digital display.",
+   "I mainly maintain a short beard and occasionally trim body hair.",
+   "Do I actually need the extra attachments?",
+   "Can you compare the relevant features, battery runtime, warranty, and prices for the models you have?",
+   "I'd rather pay less if the extra features won't benefit me.",
+   "Which one would you buy for my use case?"
+  ]
+ },
+ {
+  "title": "Close shave, maintenance, and troubleshooting",
+  "turns": [
+   "My trimmer isn't cutting as well as it used to.",
+   "I charged it fully, but it still seems to pull at the hair.",
+   "How should I clean and maintain the blades?",
+   "Which oil should I use?",
+   "Can I rinse the whole trimmer under running water?",
+   "I also noticed a little rust. Is it safe to keep using it?",
+   "If cleaning doesn't help, how do I get warranty support?"
+  ]
+ },
+ {
+  "title": "Damaged or incorrect product",
+  "turns": [
+   "My order arrived today, but one of the products is damaged.",
+   "That's disappointing because it was supposed to be a gift.",
+   "Can you arrange a replacement?",
+   "What information or photos do I need to submit?",
+   "Is there a deadline for raising this request?",
+   "Can I just email customer care instead?",
+   "Please give me the correct returns link and a short list of what I need to do next."
+  ]
+ },
+ {
+  "title": "Delayed order and customer frustration",
+  "turns": [
+   "Hi, I placed an order a few days ago and it still hasn't arrived.",
+   "I'm getting a little worried because the tracking status hasn't changed.",
+   "Can you check where my order is? My order number is BSC123456.",
+   "It's been more than three days, and nobody has contacted me.",
+   "What should I do now?",
+   "Can you give me the direct tracking link and tell me who to contact if it still doesn't update?"
+  ]
+ },
+ {
+  "title": "Face masks, serums, and product overload",
+  "turns": [
+   "I want my skin to look fresher before an event this weekend.",
+   "Should I buy a serum, face mask, face wash, or moisturiser?",
+   "I don't know my exact skin type, but my cheeks sometimes feel dry and my forehead gets oily.",
+   "Can you ask me whatever you need to know before recommending something?",
+   "I don't want to spend more than ₹1,000 in total.",
+   "Can you narrow it down to one or two suitable products?",
+   "If I buy only one today, which would you choose and why?"
+  ]
+ },
+ {
+  "title": "Finding a fragrance that matches a personality",
+  "turns": [
+   "Hey, I want a new fragrance for everyday use, but I don't know much about perfumes.",
+   "I like fresh, clean scents rather than something too sweet or overpowering.",
+   "I'd mainly wear it to the office and sometimes when going out with friends.",
+   "I'd mainly wear it to the office and sometimes when going out with friends.",
+   "Can you explain how the scents differ in simple terms instead of just listing their notes?",
+   "Which one would you choose for me, and why?",
+   "I don't want to spend too much. Can you keep the recommendation within ₹1,000?",
+   "Would a body wash with a similar scent make sense, or is that unnecessary?"
+  ]
+ },
+ {
+  "title": "First-time trimmer buyer",
+  "turns": [
+   "Hi! I'm buying my first trimmer and honestly have no idea which one to pick.",
+   "I mainly want to maintain my beard, but I'd also like to trim my body hair.",
+   "My budget is around ₹2,000.",
+   "I prefer something easy to clean and don't want too many complicated attachments.",
+   "Which options would you shortlist for me?",
+   "Why would you recommend that one over a basic beard trimmer?",
+   "How close can it trim? I don't want visible stubble.",
+   "Can I use it in the shower?",
+   "Does it come with a warranty?",
+   "Okay, if you had to pick just one for my needs, which would it be?"
+  ]
+ },
+ {
+  "title": "Full Body Trimmer feature questions",
+  "turns": [
+   "I'm considering the Full Body Trimmer. Can you explain what makes it useful for someone who grooms both their beard and body?",
+   "What attachments come with it?",
+   "How long does the battery last, and how long does charging take?",
+   "Can I charge it using my regular phone charger?",
+   "Is it waterproof enough to use in the shower?",
+   "What's covered under the warranty?",
+   "Can I buy a replacement attachment later if I lose one?",
+   "That's a lot of features. Which two or three actually matter most for my use?",
+   "i am asking about full body trimmer"
+  ]
+ },
+ {
+  "title": "Greying beard and sensitive skin",
+  "turns": [
+   "Hey, I'm starting to get grey hair in my beard and want it to look more uniform.",
+   "I want a natural-looking black colour, but I have sensitive skin.",
+   "Which beard colour options do you have?",
+   "What's the difference between Beard Colour (Natural Black) and Natural Beard Colour - Black?",
+   "Does either product contain ammonia?",
+   "How should I use it safely, and should I test it on my skin first?",
+   "I'd prefer the gentler option. Which one would you choose for me?"
+  ]
+ },
+ {
+  "title": "Hair removal spray and sensitive areas",
+  "turns": [
+   "I'm considering a hair removal spray because shaving takes too long.",
+   "Does it work differently from a razor?",
+   "Can I use it on my arms, legs, underarms, and bikini area?",
+   "My skin is sensitive, so I'm worried about irritation.",
+   "How do I know whether a product is suitable for a particular body area?",
+   "Can I use it immediately before going out, or should I test it first?",
+   "What would you recommend if I want the least complicated option?"
+  ]
+ },
+ {
+  "title": "Oily skin and a simple routine",
+  "turns": [
+   "Hey, I want to start taking better care of my skin, but skincare feels confusing.",
+   "My face gets oily by lunchtime, especially around my nose and forehead.",
+   "I sometimes get a few pimples too. What should I start with?",
+   "Do you have a face wash that would suit oily skin?",
+   "Would I still need a moisturiser if my skin is already oily?",
+   "What about a serum? Is that necessary right now?",
+   "Can you suggest a simple morning and evening routine without too many products?",
+   "I'd prefer to start with just two products. Which two would make the most sense?"
+  ]
+ },
+ {
+  "title": "Pronouns and references to earlier recommendations",
+  "turns": [
+   "I want a grooming product for my beard. What would you suggest?",
+   "Tell me a little more about the first option.",
+   "Is it better than the second one for oily skin?",
+   "Can I use it daily?",
+   "Does it come with any accessories?",
+   "How much does it cost?",
+   "Can you show me the product you recommended earlier?"
+  ]
+ },
+ {
+  "title": "The complete patchy-beard buying journey",
+  "turns": [
+   "Hey!",
+   "I've been trying to grow a beard, but it's really patchy on my cheeks. It's a bit frustrating, honestly.",
+   "Is there anything from Bombay Shaving Company that could help?",
+   "What's the difference between your Beard Growth Roll-on and Onion Beard Growth Oil?",
+   "My skin gets oily easily, and I don't like products that feel sticky. Which one would suit me better?",
+   "Okay, let's go with the one you'd recommend for me. How should I use it?",
+   "How long would it take to see a difference?",
+   "Will it actually fill the empty patches, or is it more about keeping the beard healthy?",
+   "Is there anything else I need, or is one product enough to start with?"
+  ]
+ },
+ {
+  "title": "Women's first body razor",
+  "turns": [
+   "Hi! I'm looking for a body razor for myself, but I haven't used one in a while.",
+   "I mainly want to shave my legs and underarms, and my skin can get irritated easily.",
+   "What would you recommend for a comfortable shave?",
+   "What's the difference between Rollplay and Rollplay Mini?",
+   "Do the razors have anything that helps them glide over the skin?",
+   "Are replacement cartridges available?",
+   "How often would I need to replace the blades?",
+   "Which one would you recommend if comfort matters more to me than getting the cheapest option?",
+   "re answer the above question",
+   "Which one would you recommend if comfort matters more to me than getting the cheapest option?"
+  ]
+ },
+ {
+  "title": "Women's grooming routine on a budget",
+  "turns": [
+   "I'm trying to build a simple personal-care routine for myself.",
+   "I want something for facial hair removal, something for my body, and maybe one skincare product.",
+   "I have sensitive skin and my budget is ₹1,500 for everything.",
+   "I don't want a huge routine. I want things I'll actually use.",
+   "Can you help me decide what to buy first?",
+   "Do your face razors and body razors serve different purposes?",
+   "If I skip skincare for now, what combination of grooming products fits my budget?",
+   "Please show me only the most relevant options and the total cost."
+  ]
+ }
+]

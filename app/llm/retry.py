@@ -10,9 +10,12 @@ already retries them, and stacking both would multiply the waiting time.
 import asyncio
 import logging
 import random
+import time
 from typing import Any
 
 import httpx
+
+from app.core import turn_stats
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +25,20 @@ BASE_WAIT_SECONDS = 1.5
 MAX_WAIT_SECONDS = 15.0
 
 
-def _wait_seconds(exc: httpx.HTTPStatusError, attempt: int) -> float:
+def _http_error(exc: BaseException) -> tuple[int, str] | None:
+    """(status, Retry-After header) when `exc` or its cause is an HTTP error from Mistral (httpx)
+    or Gemini (google-genai, whose errors carry the status in `.code`); otherwise None."""
+    while exc is not None:
+        if isinstance(exc, httpx.HTTPStatusError):
+            return exc.response.status_code, exc.response.headers.get("retry-after", "")
+        if type(exc).__module__.startswith("google.genai") and isinstance(getattr(exc, "code", None), int):
+            return exc.code, ""
+        exc = exc.__cause__
+    return None
+
+
+def _wait_seconds(header: str, attempt: int) -> float:
     """Retry-After if the server gave one, else exponential backoff; always capped."""
-    header = exc.response.headers.get("retry-after", "")
     try:
         base = float(header)
     except ValueError:
@@ -32,15 +46,24 @@ def _wait_seconds(exc: httpx.HTTPStatusError, attempt: int) -> float:
     return min(MAX_WAIT_SECONDS, base) * random.uniform(0.8, 1.2)
 
 
-async def ainvoke_with_retry(runnable: Any, payload: Any) -> Any:
-    """`await runnable.ainvoke(payload)`, retrying HTTP 429/5xx a few times."""
+async def ainvoke_with_retry(runnable: Any, payload: Any, label: str = "llm") -> Any:
+    """`await runnable.ainvoke(payload)`, retrying HTTP 429/5xx a few times.
+
+    Every attempt is counted in the turn stats under `label` (log only).
+    """
     for attempt in range(MAX_RETRIES + 1):
+        began = time.perf_counter()
         try:
             return await runnable.ainvoke(payload)
-        except httpx.HTTPStatusError as exc:
-            status = exc.response.status_code
-            if status not in RETRY_STATUSES or attempt == MAX_RETRIES:
+        except Exception as exc:
+            error = _http_error(exc)
+            if error is None or error[0] not in RETRY_STATUSES or attempt == MAX_RETRIES:
                 raise
-            wait = _wait_seconds(exc, attempt)
-            logger.warning("Mistral HTTP %d; retry %d/%d in %.1fs", status, attempt + 1, MAX_RETRIES, wait)
+            status, retry_after = error
+            wait = _wait_seconds(retry_after, attempt)
+            logger.warning("LLM HTTP %d; retry %d/%d in %.1fs", status, attempt + 1, MAX_RETRIES, wait)
             await asyncio.sleep(wait)
+        finally:
+            stats = turn_stats.current()
+            if stats is not None:
+                stats.add_llm(label, time.perf_counter() - began)

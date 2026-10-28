@@ -1,11 +1,13 @@
 import logging
 
+from app.graph.profile import describe
 from app.graph.state import ChatState
 from app.llm.models import get_chat_model
 from app.llm.prompts.composer import build_messages
 from app.llm.retry import ainvoke_with_retry
 from app.response.empty_replies import empty_reply
 from app.response.envelope import fallback_body
+from app.response.sanitize import sanitize_markdown
 from app.response.tray import build_tray
 from app.schemas.chat import ChatResponseBody
 
@@ -35,9 +37,13 @@ async def composer(state: ChatState) -> dict:
     try:
         reply = await ainvoke_with_retry(
             get_chat_model(),
-            build_messages(state["search_text"], result, previous, state.get("validation_issues")),
+            build_messages(
+                state["search_text"], result, previous, state.get("validation_issues"),
+                state.get("history"), describe(state.get("profile") or {}),
+            ),
+            f"composer{attempts}",
         )
-        markdown = reply.content.strip() if isinstance(reply.content, str) else ""
+        markdown = sanitize_markdown(reply.text)   # .text joins the text blocks (Gemini returns a list of blocks)
     except Exception:
         logger.exception("Composer LLM call failed (conversation_id=%s)", cid)
         return {"response": fallback_body(), "valid": True, "composer_attempts": attempts}

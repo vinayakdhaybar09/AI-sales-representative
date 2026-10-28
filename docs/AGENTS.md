@@ -22,7 +22,7 @@ Stack: Python 3.11+, FastAPI, Uvicorn, Pydantic v2 / pydantic-settings, LangChai
 3. **The `products` table is the single source of truth** for price, availability, URL, image, and product details. Embeddings only *discover* candidate IDs. Never take price/availability/URL from embedding metadata or from LLM output.
 4. **The product tray is built in Python from specialist output.** The Composer LLM never writes tray fields. The tray may contain only products present in the Recommendation Specialist result.
 5. **Never invent** product names, prices, features, policies, URLs, or contact details. Use only what specialists returned.
-6. **Out-of-stock products are never filtered out.** Each tray card carries `availability` (`in_stock` | `out_of_stock`); Markdown marks out-of-stock items "Currently out of stock".
+6. **Out-of-stock products are never filtered out, but are demoted** (in-stock first; never the single pick while an in-stock alternative exists). Each tray card carries `availability` (`in_stock` | `out_of_stock`); Markdown marks out-of-stock items "Currently out of stock".
 7. **Support has no live data.** No order status, delivery date, refund status, or order contents can be claimed. Give general guidance from support data plus the tracking link and care email found in that data.
 8. **Validator is deterministic**: no LLM, no extra API calls. One Composer retry on critical failure, then the `fallback` response. Never retry more than once.
 9. **Clarify at most once per request.** Never loop on clarification questions.

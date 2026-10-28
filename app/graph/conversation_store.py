@@ -18,11 +18,11 @@ MAX_MESSAGES = 6  # the LLM only ever sees recent history
 
 
 def _empty() -> dict[str, Any]:
-    return {"history": [], "previous_product_ids": [], "pending_clarification": None}
+    return {"history": [], "previous_product_ids": [], "pending_clarification": None, "profile": {}}
 
 
 async def load(conversation_id: str) -> dict[str, Any]:
-    """history, previous_product_ids and pending_clarification (empty if new/expired)."""
+    """history, previous_product_ids, pending_clarification and profile (empty if new/expired)."""
     ttl = get_settings().conversation_ttl_minutes
     try:
         async with get_pool().connection() as conn:
@@ -39,13 +39,15 @@ async def save(
     history: list[dict[str, str]],
     previous_product_ids: list[str],
     pending_clarification: dict[str, Any] | None,
+    profile: dict[str, Any] | None = None,
 ) -> None:
     """Persist this turn and purge conversations that have expired."""
     ttl = get_settings().conversation_ttl_minutes
     try:
         async with get_pool().connection() as conn:
             await conversations.upsert_conversation(
-                conn, conversation_id, history[-MAX_MESSAGES:], previous_product_ids, pending_clarification
+                conn, conversation_id, history[-MAX_MESSAGES:], previous_product_ids, pending_clarification,
+                profile or {},
             )
             await conversations.delete_expired(conn, ttl)
     except Exception:

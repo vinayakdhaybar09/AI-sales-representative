@@ -19,17 +19,18 @@ from app.schemas.specialist import SpecialistOutput
 
 _AMOUNT = re.compile(r"(?:₹|\bRs\.?|\bINR)\s?(\d[\d,]*(?:\.\d+)?)", re.IGNORECASE)
 _NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
-_URL = re.compile(r"https?://[^\s)\]>\"'<]+")
+_URL = re.compile(r"https?://[^\s)\]>\"'<\\]+")   # a backslash ends a URL (JSON-escaped "\n" in the data text)
 _EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+")
 _BOLD = re.compile(r"\*\*(.+?)\*\*")
 _MARKUP = re.compile(r"<!--|-->|<\s*/?\s*(?:style|script|td|tr|table|div|span|p|br)\b", re.IGNORECASE)
 _ORDER_CLAIM = re.compile(
     r"\byour (?:order|package|parcel|shipment|refund|payment|replacement)\b[^.\n]{0,40}?"
-    r"\b(?:has been|have been|is currently|is being|is on its way|is out for|"
-    r"was (?:shipped|delivered|dispatched)|will arrive|arrives)\b",
+    r"\b(?:(?:has|have) (?:(?:already|now|just|successfully|finally) )?been|is currently|is now|is being|"
+    r"is on its way|is out for|was (?:shipped|delivered|dispatched|packed|processed|cancell?ed|refunded)|"
+    r"will arrive|arrives)\b",
     re.IGNORECASE,
 )
-_CONDITIONAL = re.compile(r"\b(?:if|once|when|whenever|after|until|as soon as|in case)\b", re.IGNORECASE)
+_CONDITIONAL = re.compile(r"\b(?:if|once|when|whenever|after|until|as soon as|in case|whether)\b", re.IGNORECASE)
 OUT_OF_STOCK_PHRASE = "currently out of stock"
 MAX_MARKDOWN_CHARS = 4000
 
@@ -94,7 +95,10 @@ def validate(
     response: ChatResponseBody,
     result: SpecialistOutput,
     catalog_names: list[str],
+    user_text: str = "",
 ) -> ValidationResult:
+    """`user_text` is what the customer wrote this turn (and any answer to a clarification):
+    amounts they typed themselves, such as a budget, may be repeated back to them."""
     out = ValidationResult()
     md = response.markdown or ""
     low = md.lower()
@@ -113,8 +117,9 @@ def validate(
     # 2. tray
     _check_tray(response, result, out)
 
-    # 3. amounts: every price quoted must exist in the specialist data
+    # 3. amounts: every price quoted must exist in the specialist data (or be the customer's own number)
     allowed_numbers = {_float(n) for n in _NUMBER.findall(data_text)}
+    allowed_numbers |= {_float(n) for n in _NUMBER.findall(user_text)}
     for amount in _AMOUNT.findall(md):
         if _float(amount) not in allowed_numbers:
             out.critical.append(f"amount ₹{amount} does not appear in the specialist data")
@@ -141,6 +146,8 @@ def validate(
     # 6. bold text: a catalog product that the specialist did not return is a mix-up
     allowed_names = [p["name"].lower() for p in result.data.get("products", [])]
     catalog = {n.lower() for n in catalog_names}
+    known_text = user_text.lower()
+    allowed_names += [n for n in catalog if n in known_text]   # already part of this conversation
     for span in {s.strip().strip(":,.").lower() for s in _BOLD.findall(md)}:
         known = any(span == a or span in a or a in span for a in allowed_names)
         if known:

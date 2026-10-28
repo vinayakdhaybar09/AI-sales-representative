@@ -48,6 +48,16 @@ class Context(BaseModel):
         default=False,
         description="True only if the message answers the question the assistant just asked.",
     )
+    smalltalk: Literal["greeting", "thanks"] | None = Field(
+        default=None,
+        description="'greeting' if the message is only a greeting (hi, hello, hey); 'thanks' if it is only thanks "
+        "or a goodbye; otherwise null. A greeting that also contains a request is null.",
+    )
+    wants_single_pick: bool = Field(
+        default=False,
+        description="True if the customer asks the assistant to choose ONE product or the single best option "
+        "(\"recommend one\", \"which one should I get\", \"narrow it down to your best option\").",
+    )
 
 
 class QueryUnderstanding(BaseModel):
