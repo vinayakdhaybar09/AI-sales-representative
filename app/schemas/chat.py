@@ -39,7 +39,6 @@ class ProductCard(BaseModel):
     rank: int | None = None                # 1 = top pick
     description: str | None = None
     key_benefits: list[str] = Field(default_factory=list)
-    how_to_use: list[str] = Field(default_factory=list)
     selection_reasons: list[str] = Field(default_factory=list)
 
 class ChatResponseBody(BaseModel):

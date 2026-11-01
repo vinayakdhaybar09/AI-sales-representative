@@ -41,12 +41,10 @@ def featured_extras(product: dict[str, Any]) -> dict[str, Any]:
     details = product.get("details") or {}
     info = details.get("detailed_information") or {}
     benefits = clean_list(info.get("benefits"), 5, 160) if isinstance(info, dict) else []
-    usage = clean_list(info.get("how_to_use"), 6, 200) if isinstance(info, dict) else []
     return {
         "rank": product.get("rank"),
         "description": clean_text(product.get("description"), 500) or None,
         "key_benefits": benefits or clean_list(details.get("features"), 5, 160),
-        "how_to_use": usage,
         "selection_reasons": list(product.get("selection_reasons") or []),
     }
 

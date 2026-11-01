@@ -19,7 +19,7 @@ Response envelope (always these four keys):
       { "product_id": "8447139315866", "name": "...", "price": 450.0,
         "image_url": "https://...", "product_url": "https://...", "availability": "in_stock",
         "rating": 4.79, "review_count": 202, "original_price": 149.0,
-        "rank": null, "description": null, "key_benefits": [], "how_to_use": [], "selection_reasons": [] }
+        "rank": null, "description": null, "key_benefits": [], "selection_reasons": [] }
     ],
     "suggested_prompts": []
   },
@@ -30,8 +30,8 @@ Response envelope (always these four keys):
 - `availability` ∈ `in_stock | out_of_stock` (a deliberate addition to the original design doc).
 - `rating`, `review_count`, `original_price` on tray cards are optional (null): rating/review_count are null when the product has no reviews (never 0.0); `original_price` is set only when higher than `price`. All come from the `products` table.
 - `product_tray` is non-empty only for `recommendation` (up to 5 cards) and `product_finalization` (1–3 cards). Every other response type: `[]`.
-- **Featured cards** (`type: "product_finalization"` only; always `null` / `[]` on `recommendation` cards): `rank` (1 = top pick, 2, 3), `description` (markup stripped, max ~500 chars), `key_benefits` (≤5 short strings: the product's benefits, or its features when it lists no benefits), `how_to_use` (≤6 short steps), `selection_reasons` (short factual strings saying why it was picked). Any of them can be empty (some products have no benefits or usage text); the frontend hides empty sections.
-- **Featured layout** (frontend decides from the number of cards, ordered by `rank`): 1 card → one large card (image left; name, price, description, key benefits, how to use right). 2 cards → one row, rank 1 at 60% width and rank 2 at 40%. 3 cards → rank 1 as a large card on top, then a row with rank 2 at 60% and rank 3 at 40%.
+- **Featured cards** (`type: "product_finalization"` only; always `null` / `[]` on `recommendation` cards): `rank` (1 = top pick, 2, 3), `description` (markup stripped, max ~500 chars), `key_benefits` (≤5 short strings: the product's benefits, or its features when it lists no benefits), `selection_reasons` (short factual strings saying why it was picked). Any of them can be empty (some products have no benefits text); the frontend hides empty sections.
+- **Featured layout** (frontend): every card has the same size and structure (image with the View details / Add to cart buttons on the left, details on the right), shown in `rank` order in a horizontally scrollable tray, whether there are 1, 2 or 3 cards.
 - Failure: `{"success": false, "conversation_id": "...", "response": null, "error": {"code": "...", "message": "..."}}` for every `/api/*` failure, including 422 (`conversation_id` is `""` if the body had none). HTTP status follows the code: `invalid_request` 422, `rate_limited` 429, `internal_error` 500, `upstream_unavailable` 503, `service_unavailable` 503, `upstream_timeout` 504. Messages are client-safe (no traces, keys or internals).
 - `GET /health` → `{"status":"ok","service":"bsc-backend"}`.
 
