@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class SpecialistOutput(BaseModel):
-    specialist: Literal["recommendation", "comparison", "knowledge", "support"]
+    specialist: Literal["recommendation", "product_finalization", "comparison", "knowledge", "support"]
     status: Literal["success", "empty", "error"]
     data: dict[str, Any] = Field(default_factory=dict)
     sources: list[Any] = Field(default_factory=list)

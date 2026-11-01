@@ -13,7 +13,7 @@ import json
 import re
 from dataclasses import dataclass, field
 
-from app.response.tray import card_extras
+from app.response.tray import TRAY_SPECIALISTS, card_extras, featured_extras
 from app.schemas.chat import ChatResponseBody
 from app.schemas.specialist import SpecialistOutput
 
@@ -63,7 +63,7 @@ def _clean_url(url: str) -> str:
 
 
 def _check_tray(response: ChatResponseBody, result: SpecialistOutput, out: ValidationResult) -> None:
-    expected = result.data.get("products", []) if result.specialist == "recommendation" else []
+    expected = result.data.get("products", []) if result.specialist in TRAY_SPECIALISTS else []
     tray = response.product_tray
     if len(tray) != len(expected):
         out.critical.append(f"tray has {len(tray)} products but the specialist returned {len(expected)}")
@@ -83,6 +83,8 @@ def _check_tray(response: ChatResponseBody, result: SpecialistOutput, out: Valid
         if card.availability != product["availability"]:
             problems.append("availability")
         extras = card_extras(product)
+        if result.specialist == "product_finalization":
+            extras = {**extras, **featured_extras(product)}
         for key, value in extras.items():
             if getattr(card, key) != value:
                 problems.append(key)

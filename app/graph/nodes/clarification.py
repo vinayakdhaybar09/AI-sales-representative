@@ -42,6 +42,7 @@ async def clarification(state: ChatState) -> dict:
         "missing_field": missing,
         "question": question,
         "attempt_count": 1,
+        "result_limit": query.filters.result_limit,   # lets "just one" survive the question
     }
     logger.info("Clarification asked (conversation_id=%s, missing=%s)", state["conversation_id"], missing)
     return {

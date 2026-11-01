@@ -18,6 +18,10 @@ class ChatState(TypedDict, total=False):
     history: list[dict[str, str]]          # [{"role": "user"|"assistant", "content": ...}]
     previous_product_ids: list[str]        # product IDs shown earlier in this conversation
     pending_clarification: dict[str, Any] | None   # docs/CONTRACTS.md shape
+    pool_search_text: str | None           # search text that produced the last recommendation list
+    pool_match_scores: dict[str, float]    # product_id -> similarity score of that list
+    finalized_product_ids: list[str]       # the latest product_finalization pick
+    preferences: dict[str, Any]            # structured memory of what the customer told us
     # produced along the way
     query: QueryUnderstanding
     pending_resolved: bool                 # this message answered a pending clarification

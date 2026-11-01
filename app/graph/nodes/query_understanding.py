@@ -1,5 +1,6 @@
 import logging
 
+from app.graph import preferences as prefs_memory
 from app.graph.state import ChatState
 from app.llm.models import get_chat_model
 from app.llm.prompts.query_understanding import build_messages
@@ -13,10 +14,11 @@ async def understand(
     message: str,
     history: list[dict[str, str]],
     pending: dict | None = None,
+    preferences: dict | None = None,
 ) -> QueryUnderstanding:
     """Ask the chat model for a structured reading of `message`."""
     model = get_chat_model().with_structured_output(QueryUnderstanding)
-    result = await ainvoke_with_retry(model, build_messages(message, history, pending))
+    result = await ainvoke_with_retry(model, build_messages(message, history, pending, preferences))
     if not isinstance(result, QueryUnderstanding):
         raise ValueError("Query Understanding returned no structured output")
     return result
@@ -30,7 +32,9 @@ async def query_understanding(state: ChatState) -> dict:
     it is a new request and the pending question is dropped.
     """
     pending = state.get("pending_clarification")
-    query = await understand(state["message"], state.get("history", []), pending)
+    query = await understand(
+        state["message"], state.get("history", []), pending, state.get("preferences")
+    )
     # Product IDs come from our own state, never from the LLM.
     query.context.previously_mentioned_product_ids = list(state.get("previous_product_ids", []))
 
@@ -40,14 +44,22 @@ async def query_understanding(state: ChatState) -> dict:
     search_text = state["message"]
     if resolved:
         query.intent = pending["intent"]  # an answer never changes the original intent
+        if query.intent == "product_finalization" and query.filters.result_limit is None:
+            query.filters.result_limit = pending.get("result_limit")   # "just one" survives the question
         search_text = f"{pending['original_query']}. {state['message']}"
 
     logger.info(
         "Query understood (conversation_id=%s, intent=%s, scope=%s, resumed=%s)",
         state["conversation_id"], query.intent, query.scope, resolved,
     )
+    # Structured memory: only real, in-scope requests teach us about the customer.
+    preferences = state.get("preferences") or {}
+    if query.scope == "in_scope":
+        preferences = prefs_memory.merge(preferences, query)
+
     return {
         "query": query,
+        "preferences": preferences,
         "pending_resolved": resolved,
         "search_text": search_text,
         "pending_clarification": None,   # settled either way; clarification may set a new one

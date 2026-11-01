@@ -8,8 +8,12 @@ an Indian men's grooming brand (shaving, razors and blades, trimmers, beard care
 skin care, bath and body, fragrance, accessories). Return a structured reading of the message. \
 Do NOT answer the customer and do NOT judge whether you have enough information.
 
-intent (always one of the four values below, even for out-of-scope messages; "out_of_scope" is NEVER an intent, it only belongs in scope):
+intent (always one of the five values below, even for out-of-scope messages; "out_of_scope" is NEVER an intent, it only belongs in scope):
 - recommendation: wants product suggestions ("suggest a razor", "best oil for dry beard").
+- product_finalization: the customer already has options (or asks for "the best one") and wants YOU to pick / narrow down \
+("narrow it down to your best option", "which one should I buy?", "suggest the best one for me", "just one final pick", \
+"top 3 from these", "the cheapest of these"). Use it only when the message asks to choose among options; \
+a plain request for product suggestions is recommendation, and "X vs Y" is comparison.
 - comparison: wants products compared ("X vs Y", "which is better, A or B").
 - knowledge: grooming advice and how-to information about skin, hair and beard ("how to use beard oil", "why is my beard patchy").
 - support: orders, tracking, shipping, returns, refunds, cancellations, payments, policies, contact, warranty, \
@@ -27,6 +31,9 @@ Extraction rules:
 - entities.use_case / body_area: e.g. beard_grooming, body_grooming, face, scalp.
 - entities.attributes: the subject of knowledge or support questions (e.g. "patchy beard", "refund", "tracking") and product qualities.
 - filters: budget (numbers in INR; "under 500" -> budget_max 500), skin_type, hair_type, gender, required_features, exclusions.
+- filters.result_limit (only for product_finalization): how many products they want left. "best one" / "one final" / "the best" -> 1; \
+"top two" -> 2; "shortlist" / "narrow down to a few" / "top 3" -> 3. Leave empty if they give no hint.
+- filters.priority (only for product_finalization, only if the customer says it): "cheapest" / "lowest price" -> lowest_price; "best rated" / "highest rated" -> highest_rated.
 - For a short reply that answers an earlier assistant question, combine it with the earlier request: \
 keep the original intent and merge the new detail into entities/filters.
 - Never invent values. Leave fields empty when the message does not state them.
@@ -34,17 +41,29 @@ keep the original intent and merge the new detail into entities/filters.
 """
 
 
+def describe_preferences(preferences: dict) -> str:
+    """One readable line of what the customer told us so far ('' when nothing)."""
+    return "; ".join(
+        f"{key}: {', '.join(map(str, value)) if isinstance(value, list) else value}"
+        for key, value in preferences.items()
+    )
+
+
 def build_messages(
     message: str,
     history: list[dict[str, str]],
     pending: dict | None = None,
+    preferences: dict | None = None,
 ) -> list[BaseMessage]:
-    """System prompt + recent conversation (+ open clarification) + the new message."""
+    """System prompt + recent conversation (+ known preferences, open clarification) + the new message."""
     if history:
         lines = [f"{turn['role'].capitalize()}: {turn['content']}" for turn in history]
         convo = "Conversation so far:\n" + "\n".join(lines) + "\n\n"
     else:
         convo = ""
+    known = describe_preferences(preferences or {})
+    if known:
+        convo += f"What the customer has told us so far: {known}\n\n"
     if pending:
         convo += (
             "The assistant is waiting for an answer. It asked: "

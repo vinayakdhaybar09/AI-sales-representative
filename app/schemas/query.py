@@ -10,7 +10,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
-Intent = Literal["recommendation", "comparison", "knowledge", "support"]
+Intent = Literal["recommendation", "product_finalization", "comparison", "knowledge", "support"]
 Scope = Literal["in_scope", "out_of_scope"]
 
 
@@ -40,6 +40,13 @@ class Filters(BaseModel):
     gender: str | None = None
     required_features: list[str] = Field(default_factory=list)
     exclusions: list[str] = Field(default_factory=list)
+    # Only for intent product_finalization (docs/CONTRACTS.md):
+    result_limit: int | None = Field(
+        default=None, description="How many products the customer wants to end up with (1-3)."
+    )
+    priority: Literal["lowest_price", "highest_rated"] | None = Field(
+        default=None, description="What matters most, only if the customer says so (cheapest / best rated)."
+    )
 
 
 class Context(BaseModel):

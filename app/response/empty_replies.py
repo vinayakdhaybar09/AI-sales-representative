@@ -30,6 +30,13 @@ def empty_reply(result: SpecialistOutput, seed: str) -> ChatResponseBody:
         else:
             text = ("I couldn't find a close match for that in our catalogue. "
                     "Could you describe what you need a bit differently?")
+    elif kind == "product_finalization":
+        if "no_products_within_budget" in result.warnings:
+            text = ("I couldn't find a good pick within that budget. "
+                    "Try a higher budget, or ask me for other suggestions.")
+        else:
+            text = ("None of the products I have fit all of those requirements. "
+                    "Try relaxing one of them, or ask me for new suggestions.")
     elif kind == "comparison":
         missing = result.data.get("unresolved") or []
         if missing:

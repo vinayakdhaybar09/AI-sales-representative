@@ -18,6 +18,7 @@ async def get_conversation(
         await cur.execute(
             """
             SELECT history, previous_product_ids, pending_clarification,
+                   pool_search_text, pool_match_scores, finalized_product_ids, preferences,
                    updated_at < now() - interval '1 minute' * %s AS expired
             FROM conversations WHERE conversation_id = %s
             """,
@@ -38,17 +39,26 @@ async def upsert_conversation(
     history: list[dict[str, str]],
     previous_product_ids: list[str],
     pending_clarification: dict[str, Any] | None,
+    pool_search_text: str | None = None,
+    pool_match_scores: dict[str, float] | None = None,
+    finalized_product_ids: list[str] | None = None,
+    preferences: dict[str, Any] | None = None,
 ) -> None:
     """Insert or update a conversation and refresh its idle timer."""
     await conn.execute(
         """
         INSERT INTO conversations
-            (conversation_id, history, previous_product_ids, pending_clarification, updated_at)
-        VALUES (%s, %s, %s, %s, now())
+            (conversation_id, history, previous_product_ids, pending_clarification,
+             pool_search_text, pool_match_scores, finalized_product_ids, preferences, updated_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, now())
         ON CONFLICT (conversation_id) DO UPDATE SET
             history               = EXCLUDED.history,
             previous_product_ids  = EXCLUDED.previous_product_ids,
             pending_clarification = EXCLUDED.pending_clarification,
+            pool_search_text      = EXCLUDED.pool_search_text,
+            pool_match_scores     = EXCLUDED.pool_match_scores,
+            finalized_product_ids = EXCLUDED.finalized_product_ids,
+            preferences           = EXCLUDED.preferences,
             updated_at            = now()
         """,
         (
@@ -56,6 +66,10 @@ async def upsert_conversation(
             Jsonb(history),
             Jsonb(previous_product_ids),
             Jsonb(pending_clarification) if pending_clarification is not None else None,
+            pool_search_text,
+            Jsonb(pool_match_scores or {}),
+            Jsonb(finalized_product_ids or []),
+            Jsonb(preferences or {}),
         ),
     )
 

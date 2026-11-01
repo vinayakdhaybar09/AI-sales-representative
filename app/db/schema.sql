@@ -61,4 +61,9 @@ CREATE TABLE IF NOT EXISTS conversations (
     pending_clarification JSONB,
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+-- Product finalization + structured memory (added later; safe to re-run).
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS pool_search_text      TEXT;
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS pool_match_scores     JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS finalized_product_ids JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS preferences           JSONB NOT NULL DEFAULT '{}';
 CREATE INDEX IF NOT EXISTS conversations_updated_at_idx ON conversations (updated_at);
