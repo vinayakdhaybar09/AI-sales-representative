@@ -1,11 +1,13 @@
 """app/response/tray.py — the product tray, built in Python from specialist output.
 
-The Composer LLM never writes tray fields. Only the recommendation specialist
-produces a tray, and it can only contain products that specialist returned.
+The Composer LLM never writes tray fields. Only the recommendation and
+product_finalization specialists produce a tray, and it can only contain
+products that specialist returned.
 """
 
 from typing import Any
 
+from app.response.text import clean_list, clean_text
 from app.schemas.chat import ProductCard
 from app.schemas.specialist import SpecialistOutput
 
@@ -27,10 +29,31 @@ def card_extras(product: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+TRAY_SPECIALISTS = ("recommendation", "product_finalization")
+
+
+def featured_extras(product: dict[str, Any]) -> dict[str, Any]:
+    """Extra fields for the large product_finalization card (all may be empty).
+
+    Benefits fall back to the product's feature list when it has no benefits.
+    Text is cleaned of stray HTML/CSS for display; the database is untouched.
+    """
+    details = product.get("details") or {}
+    info = details.get("detailed_information") or {}
+    benefits = clean_list(info.get("benefits"), 5, 160) if isinstance(info, dict) else []
+    return {
+        "rank": product.get("rank"),
+        "description": clean_text(product.get("description"), 500) or None,
+        "key_benefits": benefits or clean_list(details.get("features"), 5, 160),
+        "selection_reasons": list(product.get("selection_reasons") or []),
+    }
+
+
 def build_tray(result: SpecialistOutput) -> list[ProductCard]:
-    """One card per recommended product, in specialist order; [] for every other intent."""
-    if result.specialist != "recommendation" or result.status != "success":
+    """One card per product, in specialist order; [] for every other intent."""
+    if result.specialist not in TRAY_SPECIALISTS or result.status != "success":
         return []
+    featured = result.specialist == "product_finalization"
     return [
         ProductCard(
             product_id=str(p["id"]),
@@ -40,6 +63,7 @@ def build_tray(result: SpecialistOutput) -> list[ProductCard]:
             product_url=p.get("url") or "",
             availability=p["availability"],
             **card_extras(p),
+            **(featured_extras(p) if featured else {}),
         )
         for p in result.data.get("products", [])
     ]

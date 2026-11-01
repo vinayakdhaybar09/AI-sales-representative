@@ -10,7 +10,8 @@ import logging
 from app.db.connection import get_pool
 from app.graph.state import ChatState
 from app.schemas.specialist import SpecialistOutput
-from app.specialists import comparison, knowledge, recommendation, support
+from app.graph.preferences import apply_to_query
+from app.specialists import comparison, finalization, knowledge, recommendation, support
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,17 @@ def _node(name: str, call):
 
 specialist_recommendation = _node(
     "recommendation", lambda conn, s: recommendation.run(conn, s["query"], s["search_text"])
+)
+specialist_product_finalization = _node(
+    "product_finalization",
+    # The customer's saved preferences fill any gaps in what they said this turn.
+    lambda conn, s: finalization.run(
+        conn,
+        apply_to_query(s["query"], s.get("preferences") or {}),
+        s["search_text"],
+        s.get("previous_product_ids", []),
+        s.get("pool_match_scores") or {},
+    ),
 )
 specialist_comparison = _node(
     "comparison", lambda conn, s: comparison.run(conn, s["query"], s.get("previous_product_ids", []))

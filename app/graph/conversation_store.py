@@ -14,15 +14,18 @@ from app.db.repositories import conversations
 
 logger = logging.getLogger(__name__)
 
-MAX_MESSAGES = 6  # the LLM only ever sees recent history
+MAX_MESSAGES = 12  # the LLM only ever sees recent history (assistant turns are stored compactly)
 
 
 def _empty() -> dict[str, Any]:
-    return {"history": [], "previous_product_ids": [], "pending_clarification": None}
+    return {
+        "history": [], "previous_product_ids": [], "pending_clarification": None,
+        "pool_search_text": None, "pool_match_scores": {}, "finalized_product_ids": [], "preferences": {},
+    }
 
 
 async def load(conversation_id: str) -> dict[str, Any]:
-    """history, previous_product_ids and pending_clarification (empty if new/expired)."""
+    """Everything saved for this conversation (an empty state if new/expired)."""
     ttl = get_settings().conversation_ttl_minutes
     try:
         async with get_pool().connection() as conn:
@@ -39,13 +42,19 @@ async def save(
     history: list[dict[str, str]],
     previous_product_ids: list[str],
     pending_clarification: dict[str, Any] | None,
+    *,
+    pool_search_text: str | None = None,
+    pool_match_scores: dict[str, float] | None = None,
+    finalized_product_ids: list[str] | None = None,
+    preferences: dict[str, Any] | None = None,
 ) -> None:
     """Persist this turn and purge conversations that have expired."""
     ttl = get_settings().conversation_ttl_minutes
     try:
         async with get_pool().connection() as conn:
             await conversations.upsert_conversation(
-                conn, conversation_id, history[-MAX_MESSAGES:], previous_product_ids, pending_clarification
+                conn, conversation_id, history[-MAX_MESSAGES:], previous_product_ids, pending_clarification,
+                pool_search_text, pool_match_scores, finalized_product_ids, preferences,
             )
             await conversations.delete_expired(conn, ttl)
     except Exception:

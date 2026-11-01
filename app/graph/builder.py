@@ -2,6 +2,7 @@
 
 START -> session_loader -> query_understanding -> out_of_scope | sufficiency
 sufficiency -> clarification | specialist_<intent> -> composer
+(intents: recommendation, product_finalization, comparison, knowledge, support)
 specialist -> composer -> (validator | finalize); validator -> finalize | composer (retry once) | fallback
 out_of_scope / clarification / fallback -> finalize -> END
 """
@@ -21,6 +22,7 @@ from app.graph.nodes.session_loader import session_loader
 from app.graph.nodes.specialists import (
     specialist_comparison,
     specialist_knowledge,
+    specialist_product_finalization,
     specialist_recommendation,
     specialist_support,
 )
@@ -30,6 +32,7 @@ from app.graph.state import ChatState
 
 SPECIALISTS = {
     "specialist_recommendation": specialist_recommendation,
+    "specialist_product_finalization": specialist_product_finalization,
     "specialist_comparison": specialist_comparison,
     "specialist_knowledge": specialist_knowledge,
     "specialist_support": specialist_support,

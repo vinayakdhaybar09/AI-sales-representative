@@ -7,11 +7,11 @@ in the tray, which Python builds).
 """
 
 import json
-import re
 from typing import Any
 
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 
+from app.response.text import clean_text
 from app.schemas.specialist import SpecialistOutput
 
 SYSTEM_PROMPT = """\
@@ -40,12 +40,24 @@ State what each source says, attributed ("the shipping policy says ...", "the FA
 - ambiguous_product_name: several products share that name or size options; mention that, using their exact names.
 - fuzzy_match: say which product you understood the customer meant.
 - category_not_matched: say these are the closest matches rather than exact ones.
+- selected_out_of_stock: every qualifying option is currently unavailable; say so plainly, using the words \
+"Currently out of stock" for the pick.
+- widened_search: none of the earlier options fit the customer's requirements, so these come from a new search; say that briefly.
+- fewer_results_than_requested: fewer products qualified than the customer asked for; say that only this many fit.
 """
 
 INTENT_RULES = {
     "recommendation": (
         "Write a one-sentence intro, then one bullet for EVERY product in the data (none skipped): **exact product name**, price, and one short, "
         "data-based reason it fits. Bold only product names. Keep the order given."
+    ),
+    "product_finalization": (
+        "You are a salesperson helping the customer decide. The data lists the final pick(s) in rank order; the choice is "
+        "already made, do not change it and do not mention any other product. Open with the top pick (rank 1): its exact name in bold, "
+        "its price, then 2-4 sentences on why it suits THIS customer, using only its selection_reasons, customer_needs, "
+        "description and features. Be confident and specific; if the customer stated needs (budget, skin type, use), tie the pick to them. "
+        "If there are more picks, add one short bullet for each (rank 2, 3): bold name, price, and when to choose it instead. "
+        "No table and no long list of features."
     ),
     "comparison": (
         "Write one Markdown table comparing the products (one column per product; rows such as price, "
@@ -63,17 +75,6 @@ INTENT_RULES = {
     ),
 }
 
-_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
-_TAG = re.compile(r"<[^>]+>")
-_SPACE = re.compile(r"\s+")
-
-
-def clean_text(text: Any, limit: int) -> str:
-    """Strip stray HTML/CSS comments and tags, collapse whitespace, cap length."""
-    s = _SPACE.sub(" ", _TAG.sub(" ", _COMMENT.sub(" ", str(text or "")))).strip()
-    return s if len(s) <= limit else s[:limit].rsplit(" ", 1)[0] + "…"
-
-
 def _product_view(p: dict[str, Any], with_specs: bool) -> dict[str, Any]:
     details = p.get("details") or {}
     view: dict[str, Any] = {
@@ -87,6 +88,9 @@ def _product_view(p: dict[str, Any], with_specs: bool) -> dict[str, Any]:
     }
     if p.get("original_price") and p["original_price"] > p["price"]:
         view["original_price"] = f"₹{p['original_price']:g}"
+    if p.get("rank"):
+        view["rank"] = p["rank"]
+        view["selection_reasons"] = p.get("selection_reasons") or []
     if with_specs:
         specs = {k: v for k, v in (details.get("specifications") or {}).items() if k != "options"}
         view["specifications"] = {k: clean_text(v, 80) for k, v in list(specs.items())[:8]}
@@ -100,6 +104,9 @@ def serialise(result: SpecialistOutput) -> str:
     with_specs = result.specialist == "comparison"
     if d.get("products"):
         out["products"] = [_product_view(p, with_specs) for p in d["products"]]
+    if result.specialist == "product_finalization":
+        out["customer_needs"] = d.get("criteria_applied") or []
+        out["customer_asked_for_products"] = d.get("requested")
     if d.get("chunks"):
         out["articles"] = [
             {"title": c["title"], "heading": c["heading"], "url": c["url"], "excerpt": clean_text(c["content"], 1200)}

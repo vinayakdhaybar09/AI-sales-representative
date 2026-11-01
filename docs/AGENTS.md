@@ -3,7 +3,7 @@
 Read this file fully before writing any code. It is the entry point; details live in `docs/`.
 
 ## What this project is
-Backend for an AI sales assistant for **Bombay Shaving Company (BSC)**. A user sends a natural-language message; the backend returns Markdown, an optional product tray (product cards), and optional suggested prompts. It handles four intents: `recommendation`, `comparison`, `knowledge`, `support`. Anything unrelated to BSC is politely declined (`out_of_scope`).
+Backend for an AI sales assistant for **Bombay Shaving Company (BSC)**. A user sends a natural-language message; the backend returns Markdown, an optional product tray (product cards), and optional suggested prompts. It currently handles these intents: `recommendation`, `product_finalization`, `comparison`, `knowledge`, `support`. The intent set is expected to evolve: do not treat it as fixed. Anything unrelated to BSC is politely declined (`out_of_scope`).
 
 Stack: Python 3.11+, FastAPI, Uvicorn, Pydantic v2 / pydantic-settings, LangChain (model/embedding/retrieval abstraction), LangGraph (workflow), Neon PostgreSQL + pgvector, Mistral (`mistral-small-latest` chat, `mistral-embed` 1024-dim embeddings). Hugging Face is a **fallback only**. Frontend (separate repo) is React + `react-markdown`.
 

@@ -60,6 +60,7 @@ Clarification and out-of-scope **skip** Specialist → Composer → Validator (t
 | Intent | Sufficient when |
 |---|---|
 | recommendation | a product category, OR a concern/use case/skin type is present |
+| product_finalization | products were already shown in this conversation; otherwise the recommendation rules above (the specialist then searches first) |
 | comparison | at least two product references resolvable from query/context |
 | knowledge | a topic/entity/question subject is present |
 | support | always sufficient (RAG handles breadth) |
@@ -68,6 +69,7 @@ Clarify on the single most decisive missing field (e.g. trimmer → `use_case`: 
 
 ## Specialists (each returns data, never final prose)
 - **Recommendation**: semantic search over product embeddings (top-k) → candidate product IDs → SQL lookup in `products` → apply filters (budget, category, gender, etc.) → rank (default: similarity order) → full product records. May pull blog chunks for context.
+- **Product finalization**: narrows options down to the best 1–3 (`filters.result_limit`). Candidates = the products shown earlier (the saved pool); with no pool, or when the criteria rule out all of it, it runs the recommendation search and picks from that. Python picks (budget/exclusions → in-stock only → priority or a quality score from review-weighted rating, fit to stated needs and match score) and writes `selection_reasons`; the Composer only explains. The tray holds the pick(s) as featured cards (rank, description, benefits, how to use). Details: `docs/CONTRACTS.md`.
 - **Comparison**: resolve 2+ products (direct SQL by name/ID match, embeddings as fallback) → structured comparison fields from `products`.
 - **Knowledge**: blog-chunk semantic search (`source_type='blog'`) + product info via SQL when a product is named.
 - **Support**: semantic search over `source_type='support'` (FAQs + policies). No order lookup. Return the tracking link and `care@bombayshavingcompany.com` as found in the retrieved data.
@@ -88,7 +90,7 @@ Implemented checks (`app/response/validator.py`): type/structure, non-empty Mark
 Specialist `empty` results get a fixed reply (`app/response/empty_replies.py`, no LLM, no validation); `error` results go straight to `fallback`.
 
 ## Conversation state
-Stored in Postgres (`conversations` table, `app/graph/conversation_store.py`). A conversation idle longer than `CONVERSATION_TTL_MINUTES` (default 15) is treated as new and deleted; a storage failure never blocks an answer. Pass only *relevant* recent history to the LLM, not everything. Expire inactive conversations after ~10–15 minutes (details in Phase 12).
+Stored in Postgres (`conversations` table, `app/graph/conversation_store.py`). Besides the last 12 messages (assistant turns stored compactly) it keeps the product pool of the last recommendation, the latest finalized pick, and `preferences`: structured memory merged in Python (`app/graph/preferences.py`) from each turn's extracted entities/filters, so early needs ("sensitive skin") are not forgotten when old messages drop out of the window. A conversation idle longer than `CONVERSATION_TTL_MINUTES` (default 15) is treated as new and deleted; a storage failure never blocks an answer. Pass only *relevant* recent history to the LLM, not everything. Expire inactive conversations after ~10–15 minutes (details in Phase 12).
 
 ## Out-of-scope / suggested prompts
 Suggested prompts come from a **small predefined list** of BSC questions (not freely generated). Out-of-scope shows 1–2 of them.

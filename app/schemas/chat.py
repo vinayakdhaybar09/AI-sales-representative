@@ -3,6 +3,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 ResponseType = Literal[
     "recommendation",
+    "product_finalization",
     "comparison",
     "knowledge",
     "support",
@@ -34,6 +35,11 @@ class ProductCard(BaseModel):
     rating: float | None = None            # null when the product has no reviews
     review_count: int | None = None        # null when the product has no reviews
     original_price: float | None = None    # only set when higher than price (a real discount)
+    # Featured-card extras: filled only for product_finalization (empty otherwise).
+    rank: int | None = None                # 1 = top pick
+    description: str | None = None
+    key_benefits: list[str] = Field(default_factory=list)
+    selection_reasons: list[str] = Field(default_factory=list)
 
 class ChatResponseBody(BaseModel):
     """The 'response' part of the envelope."""
