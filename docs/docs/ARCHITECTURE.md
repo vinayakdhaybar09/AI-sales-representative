@@ -33,6 +33,7 @@ Swapping the scraped product data for a real BSC API must only require changing 
 6. **Specialists** return `{specialist, status, data, sources, warnings}`. One query may use several (e.g. recommendation + knowledge).
 7. **Composer** (LLM) writes Markdown from specialist output only; `product_tray` is built in Python.
 8. **Validator** (deterministic) compares response to specialist output. Critical failure → Composer runs once more with (specialist output, previous response, issues) → Validator again → still invalid → `fallback`.
+8b. **Reviewer** (LLM, generic, once per turn): when the validator passes a real answer (recommendation, product_finalization, comparison, knowledge, support), the reviewer judges whether the reply *fulfils the request* using Query Understanding's `resolved_request` and `requirements`, a little conversation and the specialist evidence. Problems (`missing`, `unsupported`, `irrelevant`) go back to the Composer as feedback, and unrelated products it names are dropped from the specialist result (so the tray stays a subset of it). This is the single revision of the turn, shared with the validator retry; the revision is checked by the deterministic validator only. The reviewer never triggers the fallback itself, and any reviewer error or timeout ships the validated reply.
 9. **Envelope** wraps into final JSON. State is saved.
 
 ```
@@ -41,7 +42,8 @@ Load state → Query Understanding ─┬→ Out-of-Scope Handler ────�
                            Sufficiency Check                          │
                             ├ insufficient → Clarification Handler ───┤
                             ↓ sufficient                              │
-                  Specialist(s) → Composer ⇄ Validator (retry once) ──┤
+                  Specialist(s) → Composer ⇄ Validator ⇄ Reviewer      │
+                                   (one revision in total) ───────────┤
                                    └ still invalid → fallback ────────┤
                                                                       ↓
                                                               Response Envelope
@@ -87,6 +89,7 @@ Specialist `status`: `success | empty | error`. `warnings` carries things like "
 **Critical (trigger retry):** response structure/type valid; tray product IDs, names, prices, image URLs, product URLs, availability match specialist output; tray ⊆ specialist products; comparison values match; support contact/policy values match.
 **Non-critical (log only):** Markdown quality, optional badges, optional source metadata, wording.
 Implemented checks (`app/response/validator.py`): type/structure, non-empty Markdown, no raw HTML/CSS markup, tray equals specialist products field by field (empty for non-recommendation), every ₹ amount / URL / email in the Markdown exists in the specialist data, a bolded catalog product not in the result, out-of-stock product without "Currently out of stock", customer-specific order claims. It is heuristic and cannot prove every sentence is grounded.
+The **Reviewer** (`app/graph/nodes/reviewer.py`, `app/llm/prompts/reviewer.py`, pure helpers in `app/response/review.py`) is a separate, specialist-independent LLM layer on top of the deterministic checks. It skips fixed replies, errors, greetings, clarifications and out-of-scope answers; it can be switched off with `REVIEWER_ENABLED=false`. Dropping products is limited to recommendation and product_finalization (comparison needs all its products); when none remain the Composer gets warning `no_suitable_products`.
 Specialist `empty` results get a fixed reply (`app/response/empty_replies.py`, no LLM, no validation); `error` results go straight to `fallback`.
 
 ## Conversation state

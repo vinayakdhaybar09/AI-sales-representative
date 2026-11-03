@@ -55,6 +55,7 @@ Fallback response body:
 - `filters.priority` (`"lowest_price" | "highest_rated"` or null; used only by `product_finalization`): set when the user names what matters most ("cheapest one", "best rated"). Other criteria the user states ("under ₹300", "for sensitive skin", "lightweight") go into the existing `filters` / `entities` fields.
 - Empty fields are fine. It extracts; it does **not** answer or judge sufficiency. It resolves references like "this product" using conversation state. Exact product matching happens in retrieval.
 - `entities`, `filters`, `context` are typed Pydantic sub-models with all fields optional (an empty `{}` is still valid). `context.previously_mentioned_product_ids` is filled by Python from conversation state, never by the LLM. `context.answers_pending_clarification` (bool, default false) is set by the LLM only when the message answers the open clarification question.
+- `resolved_request` (string; defaults to the message / search text): the message rewritten as one standalone sentence with references resolved ("this issue" → "dandruff", "the first two" → the two product names). `requirements` (list of ≤6 short strings): what a good answer must satisfy, including ones carried over from earlier turns. Both are filled by the LLM and read by the reviewer (`docs/ARCHITECTURE.md`); no specialist uses them to retrieve.
 - `out_of_scope` is a `scope` value, not a fifth intent.
 - Example: `{"intent":"recommendation","scope":"in_scope","entities":{"category":"trimmer","use_case":["body_grooming"]},"filters":{"budget_max":2000},"context":{"previously_mentioned_product_ids":[]}}`
 
@@ -104,7 +105,7 @@ Fallback response body:
 - comparison: `{products: [full rows], comparable_fields: [...], unresolved: [names]}`; ambiguous or fuzzy name matches add warnings.
 - knowledge: `{chunks: [{source_id,title,heading,category,url,content,score}], products: [full rows for named products]}`.
 - support: `{items: [{source_id,kind,category,content,score}], contact_info: {tracking_url, care_email}, live_order_data_available: false}`.
-Warnings used so far: `trimmer_model_not_identified`, `shipping_charges_differ_between_sources`, `returns_wording_differs_between_sources`, `ambiguous_product_name`, `fuzzy_match`, `category_not_matched`, `no_products_within_budget`, `includes_out_of_stock`, `selected_out_of_stock`, `no_products_match_criteria`, `fewer_results_than_requested`, `widened_search`, `no_relevant_*`, `could_not_resolve_two_products`, `specialist_failed`.
+Warnings used so far: `trimmer_model_not_identified`, `shipping_charges_differ_between_sources`, `returns_wording_differs_between_sources`, `ambiguous_product_name`, `fuzzy_match`, `category_not_matched`, `no_products_within_budget`, `includes_out_of_stock`, `selected_out_of_stock`, `no_products_match_criteria`, `fewer_results_than_requested`, `widened_search`, `no_suitable_products`, `no_relevant_*`, `could_not_resolve_two_products`, `specialist_failed`.
 
 ## Composer output (internal)
 ```json
@@ -112,6 +113,14 @@ Warnings used so far: `trimmer_model_not_identified`, `shipping_charges_differ_b
   "metadata": { "specialists_used": [], "sources": [] } }
 ```
 The envelope's `response` = `type, markdown, product_tray, suggested_prompts` (metadata stays internal).
+
+## Reviewer verdict (`app/schemas/review.py`, internal)
+```json
+{ "fulfils": false,
+  "issues": [ { "kind": "missing|unsupported|irrelevant", "detail": "One short sentence saying what to fix." } ],
+  "exclude_item_ids": ["8447139315866"] }
+```
+`exclude_item_ids` are honoured only if they are in the specialist output and the specialist is `recommendation` or `product_finalization`. `fulfils: true` always wins (issues and ids are ignored). After exclusions, finalization ranks are renumbered; when no product is left the specialist output gets warning `no_suitable_products` and the tray is `[]`. Settings: `REVIEWER_ENABLED` (default true), `REVIEWER_TIMEOUT_SECONDS` (default 15); `REQUEST_TIMEOUT_SECONDS` default is 90.
 
 ## Embedding record (single `embeddings` table)
 `source_type` (`product|blog|support`), `source_id`, `content`, `metadata` (jsonb), `embedding` vector(1024).

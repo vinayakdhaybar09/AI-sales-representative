@@ -6,6 +6,7 @@ from app.llm.prompts.composer import build_messages
 from app.llm.retry import ainvoke_with_retry
 from app.response.empty_replies import empty_reply
 from app.response.envelope import fallback_body
+from app.response.review import apply_exclusions
 from app.response.tray import build_tray
 from app.schemas.chat import ChatResponseBody
 
@@ -30,6 +31,12 @@ async def composer(state: ChatState) -> dict:
         logger.warning("Composer: specialist error, fallback (conversation_id=%s)", cid)
         return {"response": fallback_body(), "valid": True}
 
+    # The reviewer may have found products that do not address the request: compose without them.
+    excluded = state.get("excluded_item_ids") or []
+    if excluded:
+        result = apply_exclusions(result, excluded)
+        logger.info("Composer: dropping %d reviewer-excluded product(s) (conversation_id=%s)", len(excluded), cid)
+
     attempts = state.get("composer_attempts", 0) + 1
     previous = state["response"].markdown if attempts > 1 and "response" in state else None
     try:
@@ -40,11 +47,14 @@ async def composer(state: ChatState) -> dict:
         markdown = reply.content.strip() if isinstance(reply.content, str) else ""
     except Exception:
         logger.exception("Composer LLM call failed (conversation_id=%s)", cid)
-        return {"response": fallback_body(), "valid": True, "composer_attempts": attempts}
+        return {"response": fallback_body(), "valid": True, "composer_attempts": attempts, "specialist_result": result}
 
     logger.info("Composer attempt %d done (conversation_id=%s, markdown_length=%d)", attempts, cid, len(markdown))
     return {
         "response": ChatResponseBody(type=result.specialist, markdown=markdown, product_tray=build_tray(result)),
         "composer_attempts": attempts,
         "valid": False,   # not valid until the validator says so
+        # Kept in state so the validator, the tray and `finalize` all see the same (possibly trimmed) products.
+        "specialist_result": result,
+        "excluded_item_ids": [],
     }

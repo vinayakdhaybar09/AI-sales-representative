@@ -68,6 +68,16 @@ class QueryUnderstanding(BaseModel):
     entities: Entities = Field(default_factory=Entities)
     filters: Filters = Field(default_factory=Filters)
     context: Context = Field(default_factory=Context)
+    resolved_request: str = Field(
+        default="",
+        description="The customer's message rewritten as one standalone sentence: 'this issue', 'the first two', "
+        "'it' replaced by what they refer to. Nothing the customer did not ask for.",
+    )
+    requirements: list[str] = Field(
+        default_factory=list,
+        description="Up to 6 short phrases a good answer must satisfy (the concern, requested material or quality, "
+        "budget, which products to compare, how many to pick), including ones carried over from earlier turns.",
+    )
 
     @model_validator(mode="before")
     @classmethod

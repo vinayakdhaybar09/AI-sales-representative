@@ -32,5 +32,7 @@ class ChatState(TypedDict, total=False):
     composer_attempts: int                 # 1 = first composition, 2 = the single retry
     validation_issues: list[str]           # critical issues from the last validation
     valid: bool                            # the response may be sent as it is
+    reviewed: bool                         # the reviewer has already looked at this turn's reply
+    excluded_item_ids: list[str]           # products the reviewer wants removed before the revision
     # final result (built by out_of_scope / clarification / composer)
     response: ChatResponseBody

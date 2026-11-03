@@ -28,7 +28,9 @@ class Settings(BaseSettings):
 
     # Conversations and request limits
     conversation_ttl_minutes: float = 15      # idle time before a conversation expires
-    request_timeout_seconds: float = 60       # whole-request budget for one chat message
+    request_timeout_seconds: float = 90       # whole-request budget for one chat message (room for a review + one revision)
+    reviewer_enabled: bool = True             # LLM check that the reply fulfils the request
+    reviewer_timeout_seconds: float = 15
 
 @lru_cache
 def get_settings() -> Settings:

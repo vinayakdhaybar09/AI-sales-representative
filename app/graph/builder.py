@@ -3,7 +3,8 @@
 START -> session_loader -> query_understanding -> out_of_scope | sufficiency
 sufficiency -> clarification | specialist_<intent> -> composer
 (intents: recommendation, product_finalization, comparison, knowledge, support)
-specialist -> composer -> (validator | finalize); validator -> finalize | composer (retry once) | fallback
+specialist -> composer -> (validator | finalize); validator -> reviewer | composer (retry once) | fallback
+reviewer -> finalize | composer (the single revision; shared with the validator retry)
 out_of_scope / clarification / fallback -> finalize -> END
 """
 
@@ -18,6 +19,7 @@ from app.graph.nodes.fallback import fallback
 from app.graph.nodes.finalize import finalize
 from app.graph.nodes.out_of_scope import out_of_scope
 from app.graph.nodes.query_understanding import query_understanding
+from app.graph.nodes.reviewer import reviewer
 from app.graph.nodes.session_loader import session_loader
 from app.graph.nodes.specialists import (
     specialist_comparison,
@@ -52,6 +54,7 @@ def get_graph():
         g.add_node(name, node)
     g.add_node("composer", composer)
     g.add_node("validator", validator)
+    g.add_node("reviewer", reviewer)
     g.add_node("fallback", fallback)
     g.add_node("finalize", finalize)
 
@@ -72,7 +75,10 @@ def get_graph():
     )
     g.add_conditional_edges(
         "validator", routers.after_validator,
-        {"finalize": "finalize", "composer": "composer", "fallback": "fallback"},
+        {"reviewer": "reviewer", "finalize": "finalize", "composer": "composer", "fallback": "fallback"},
+    )
+    g.add_conditional_edges(
+        "reviewer", routers.after_reviewer, {"finalize": "finalize", "composer": "composer"}
     )
     for name in ("out_of_scope", "clarification", "fallback"):
         g.add_edge(name, "finalize")

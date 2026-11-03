@@ -9,6 +9,8 @@ from app.schemas.query import QueryUnderstanding
 
 logger = logging.getLogger(__name__)
 
+MAX_REQUIREMENTS = 6
+
 
 async def understand(
     message: str,
@@ -47,6 +49,10 @@ async def query_understanding(state: ChatState) -> dict:
         if query.intent == "product_finalization" and query.filters.result_limit is None:
             query.filters.result_limit = pending.get("result_limit")   # "just one" survives the question
         search_text = f"{pending['original_query']}. {state['message']}"
+
+    # Always leave the later stages a usable standalone request and a short requirement list.
+    query.resolved_request = query.resolved_request.strip() or search_text
+    query.requirements = [r.strip() for r in query.requirements if r and r.strip()][:MAX_REQUIREMENTS]
 
     logger.info(
         "Query understood (conversation_id=%s, intent=%s, scope=%s, resumed=%s)",

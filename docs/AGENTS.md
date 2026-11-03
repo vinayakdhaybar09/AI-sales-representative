@@ -24,7 +24,7 @@ Stack: Python 3.11+, FastAPI, Uvicorn, Pydantic v2 / pydantic-settings, LangChai
 5. **Never invent** product names, prices, features, policies, URLs, or contact details. Use only what specialists returned.
 6. **Out-of-stock products are never filtered out.** Each tray card carries `availability` (`in_stock` | `out_of_stock`); Markdown marks out-of-stock items "Currently out of stock".
 7. **Support has no live data.** No order status, delivery date, refund status, or order contents can be claimed. Give general guidance from support data plus the tracking link and care email found in that data.
-8. **Validator is deterministic**: no LLM, no extra API calls. One Composer retry on critical failure, then the `fallback` response. Never retry more than once.
+8. **Validator is deterministic**: no LLM, no extra API calls. A separate generic LLM **reviewer** (`app/graph/nodes/reviewer.py`) checks that the reply fulfils the request; it is fail-open and never triggers the fallback itself. One Composer revision per turn in total (validator retry and reviewer feedback share it), then the `fallback` response if the deterministic validator still fails. Never revise more than once.
 9. **Clarify at most once per request.** Never loop on clarification questions.
 10. **Secrets.** `.env` is never committed. Keys are `SecretStr`; call `.get_secret_value()` in exactly one place (the `llm/models.py` / `db/connection.py` factory). Never log secrets.
 11. **Logging.** Use `logging.getLogger(__name__)`, `%s` placeholders. Log message **length** at INFO; message **content** only at DEBUG.

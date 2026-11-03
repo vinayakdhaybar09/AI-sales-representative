@@ -43,6 +43,10 @@ State what each source says, attributed ("the shipping policy says ...", "the FA
 - selected_out_of_stock: every qualifying option is currently unavailable; say so plainly, using the words \
 "Currently out of stock" for the pick.
 - widened_search: none of the earlier options fit the customer's requirements, so these come from a new search; say that briefly.
+- no_suitable_products: none of the products we found address what the customer asked for, so the data lists no products. \
+Ignore the style line about listing products. Say plainly and kindly that we don't currently have a suitable product for what they \
+asked (use their own words), do not present any other product as a solution, and end with one helpful next step \
+(for example a related need you can help with). Do not claim we will add products.
 - fewer_results_than_requested: fewer products qualified than the customer asked for; say that only this many fit.
 """
 
