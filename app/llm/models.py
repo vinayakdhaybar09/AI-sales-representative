@@ -42,19 +42,24 @@ def get_embeddings() -> MistralAIEmbeddings:
     )
 
 
+def get_chat_model(temperature: float = 0) -> ChatMistralAI:
+    """The shared Mistral chat model. Temperature 0 (default) is for extracting and checking;
+    a small value (e.g. 0.3) is for replies that should not sound identical every time."""
+    return _build_chat_model(float(temperature))
+
+
 @lru_cache
-def get_chat_model() -> ChatMistralAI:
-    """Return the shared Mistral chat model (temperature 0: we extract, not create)."""
+def _build_chat_model(temperature: float) -> ChatMistralAI:
     settings = get_settings()
     if settings.mistral_api_key is None:
         raise MissingApiKeyError(
             "MISTRAL_API_KEY is not set. Add it to .env and restart."
         )
-    logger.info("Building chat model (model=%s)", settings.chat_model)
+    logger.info("Building chat model (model=%s, temperature=%s)", settings.chat_model, temperature)
     return ChatMistralAI(
         model=settings.chat_model,
         api_key=settings.mistral_api_key,
-        temperature=0,
+        temperature=temperature,
         max_retries=2,      # network errors only; HTTP 429/5xx are handled in app/llm/retry.py
         timeout=30,
     )

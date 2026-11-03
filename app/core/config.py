@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     request_timeout_seconds: float = 90       # whole-request budget for one chat message (room for a review + one revision)
     reviewer_enabled: bool = True             # LLM check that the reply fulfils the request
     reviewer_timeout_seconds: float = 15
+    composer_temperature: float = 0.3         # a little variety in wording; extraction and review stay at 0
+    conversation_timeout_seconds: float = 15   # greeting / off-topic reply (falls back to fixed lines)
 
 @lru_cache
 def get_settings() -> Settings:

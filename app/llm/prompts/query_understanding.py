@@ -8,7 +8,7 @@ an Indian men's grooming brand (shaving, razors and blades, trimmers, beard care
 skin care, bath and body, fragrance, accessories). Return a structured reading of the message. \
 Do NOT answer the customer and do NOT judge whether you have enough information.
 
-intent (always one of the five values below, even for out-of-scope messages; "out_of_scope" is NEVER an intent, it only belongs in scope):
+intent (always one of the six values below; "out_of_scope" is NEVER an intent, it only belongs in scope):
 - recommendation: wants product suggestions ("suggest a razor", "best oil for dry beard").
 - product_finalization: the customer already has options (or asks for "the best one") and wants YOU to pick / narrow down \
 ("narrow it down to your best option", "which one should I buy?", "suggest the best one for me", "just one final pick", \
@@ -19,10 +19,16 @@ a plain request for product suggestions is recommendation, and "X vs Y" is compa
 - support: orders, tracking, shipping, returns, refunds, cancellations, payments, policies, contact, warranty, \
 and questions about how a trimmer works or is cared for (run time, battery, charging, waterproof, blades, attachments). \
 "How do I track / cancel / return / get a refund ..." is support, never knowledge.
+- conversation: anything that is not a request for products, comparison, grooming information or order/policy help. \
+Greetings ("hi", "hello", "good morning"), "how are you", thanks, goodbyes, "who are you" / "what can you do", bare acknowledgements \
+("ok", "hmm", "cool") when the assistant asked nothing, and ANY message unrelated to BSC (general knowledge, weather, coding help, other brands). \
+A greeting is NEVER knowledge: "hi" has no grooming topic to look up. If a greeting comes with a real request ("hi, suggest a razor"), \
+use the intent of the request.
 
 scope:
 - out_of_scope ONLY when the message has nothing to do with BSC, grooming or its products/orders \
-(weather, politics, coding help, general trivia, other brands' shopping). Greetings are in_scope with intent knowledge.
+(weather, politics, coding help, general trivia, other brands' shopping); use intent conversation for it.
+- Greetings, thanks and chit-chat are in_scope with intent conversation.
 - Otherwise in_scope.
 
 Extraction rules:

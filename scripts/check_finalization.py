@@ -138,6 +138,21 @@ def main() -> int:
     check("recommendation cards carry no featured fields", build_tray(rec)[0].rank is None and build_tray(rec)[0].key_benefits == [])
     check("composer data shows rank and reasons", '"rank": 1' in serialise(result) and "customer_needs" in serialise(result))
 
+    print("— validator: invented time periods —")
+    sup = SpecialistOutput(specialist="support", status="success",
+                           data={"items": [{"content": "Orders ship within 7-10 business days. Refunds take 5 days."}], "contact_info": {}})
+    ok = ChatResponseBody(type="support", markdown="Orders ship within 7-10 business days, and refunds take 5 days.")
+    bad = ChatResponseBody(type="support", markdown="Orders usually ship in 2-3 business days.")
+    check("a support period that is in the data passes", validate(ok, sup, []).valid)
+    check("an invented support period is critical", not validate(bad, sup, []).valid)
+    rec2 = SpecialistOutput(specialist="recommendation", status="success", data={"products": POOL[:1]})
+    note = validate(ChatResponseBody(type="recommendation", markdown="**Alpha Trimmer** ₹499, ready in 3 days.", product_tray=build_tray(rec2)), rec2, [])
+    check("elsewhere an invented period is only a note", note.valid and any("time period" in n for n in note.non_critical), str(note.non_critical))
+
+    echo = ChatResponseBody(type="recommendation", markdown="**Alpha Trimmer** at ₹499 is within ₹700.", product_tray=build_tray(rec2))
+    check("an amount only the customer typed is rejected without the request", not validate(echo, rec2, []).valid)
+    check("...and accepted when it is in the customer's request", validate(echo, rec2, [], "a trimmer under 700").valid)
+
     print("— graph —")
     nodes = set(get_graph().get_graph().nodes)
     check("graph compiles with specialist_product_finalization", "specialist_product_finalization" in nodes, str(sorted(nodes)))

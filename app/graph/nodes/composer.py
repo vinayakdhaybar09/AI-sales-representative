@@ -1,5 +1,6 @@
 import logging
 
+from app.core.config import get_settings
 from app.graph.state import ChatState
 from app.llm.models import get_chat_model
 from app.llm.prompts.composer import build_messages
@@ -39,10 +40,12 @@ async def composer(state: ChatState) -> dict:
 
     attempts = state.get("composer_attempts", 0) + 1
     previous = state["response"].markdown if attempts > 1 and "response" in state else None
+    query = state.get("query")
+    request = (query.resolved_request if query and query.resolved_request else state["search_text"])
     try:
         reply = await ainvoke_with_retry(
-            get_chat_model(),
-            build_messages(state["search_text"], result, previous, state.get("validation_issues")),
+            get_chat_model(get_settings().composer_temperature),
+            build_messages(request, result, previous, state.get("validation_issues"), state.get("history", [])),
         )
         markdown = reply.content.strip() if isinstance(reply.content, str) else ""
     except Exception:

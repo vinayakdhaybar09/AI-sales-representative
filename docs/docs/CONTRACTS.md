@@ -26,7 +26,7 @@ Response envelope (always these four keys):
   "error": null
 }
 ```
-- `type` ∈ `recommendation | product_finalization | comparison | knowledge | support | clarification | out_of_scope | fallback`.
+- `type` ∈ `recommendation | product_finalization | comparison | knowledge | support | clarification | conversation | fallback`.
 - `availability` ∈ `in_stock | out_of_stock` (a deliberate addition to the original design doc).
 - `rating`, `review_count`, `original_price` on tray cards are optional (null): rating/review_count are null when the product has no reviews (never 0.0); `original_price` is set only when higher than `price`. All come from the `products` table.
 - `product_tray` is non-empty only for `recommendation` (up to 5 cards) and `product_finalization` (1–3 cards). Every other response type: `[]`.
@@ -45,7 +45,7 @@ Fallback response body:
 
 ## Query Understanding output (`app/schemas/query.py`)
 ```json
-{ "intent": "recommendation|product_finalization|comparison|knowledge|support",
+{ "intent": "recommendation|product_finalization|comparison|knowledge|support|conversation",
   "scope": "in_scope|out_of_scope",
   "entities": {},  "filters": {},  "context": {} }
 ```
@@ -56,7 +56,7 @@ Fallback response body:
 - Empty fields are fine. It extracts; it does **not** answer or judge sufficiency. It resolves references like "this product" using conversation state. Exact product matching happens in retrieval.
 - `entities`, `filters`, `context` are typed Pydantic sub-models with all fields optional (an empty `{}` is still valid). `context.previously_mentioned_product_ids` is filled by Python from conversation state, never by the LLM. `context.answers_pending_clarification` (bool, default false) is set by the LLM only when the message answers the open clarification question.
 - `resolved_request` (string; defaults to the message / search text): the message rewritten as one standalone sentence with references resolved ("this issue" → "dandruff", "the first two" → the two product names). `requirements` (list of ≤6 short strings): what a good answer must satisfy, including ones carried over from earlier turns. Both are filled by the LLM and read by the reviewer (`docs/ARCHITECTURE.md`); no specialist uses them to retrieve.
-- `out_of_scope` is a `scope` value, not a fifth intent.
+- `conversation` = greetings, thanks, how are you, who are you, bare acknowledgements, and anything unrelated to BSC. `out_of_scope` is a `scope` value (a hint), never an intent; both `scope = out_of_scope` and `intent = conversation` are answered by the conversation node with response `type: "conversation"` (no separate out-of-scope response type).
 - Example: `{"intent":"recommendation","scope":"in_scope","entities":{"category":"trimmer","use_case":["body_grooming"]},"filters":{"budget_max":2000},"context":{"previously_mentioned_product_ids":[]}}`
 
 ## Pending clarification (in conversation state)

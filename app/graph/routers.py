@@ -5,10 +5,17 @@ from app.graph.state import ChatState
 from app.response.review import should_review
 
 
+# Intents answered by a retrieval specialist (a `specialist_<intent>` node). Every other intent,
+# including `conversation` and any intent added later without a specialist, is answered by the
+# conversation node instead of failing.
+SPECIALIST_INTENTS = ("recommendation", "product_finalization", "comparison", "knowledge", "support")
+
+
 def after_query_understanding(state: ChatState) -> str:
-    """Out-of-scope messages skip everything and get a polite decline."""
-    if state["query"].scope == "out_of_scope":
-        return "out_of_scope"
+    """Greetings, small talk and off-topic messages go to the conversation node, skipping retrieval."""
+    query = state["query"]
+    if query.scope == "out_of_scope" or query.intent not in SPECIALIST_INTENTS:
+        return "conversation"
     return "sufficiency"
 
 

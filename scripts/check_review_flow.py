@@ -72,10 +72,10 @@ async def run_flow(*, replies, reviews, specialist_status="success", reviewer_en
 
     real_build = composer_node.build_messages
 
-    def spy_build(request_text, result, previous=None, issues=None):
+    def spy_build(request_text, result, previous=None, issues=None, history=None):
         calls.composer.append({"products": [p["name"] for p in result.data.get("products", [])],
                                "warnings": list(result.warnings), "issues": list(issues or [])})
-        return real_build(request_text, result, previous, issues)
+        return real_build(request_text, result, previous, issues, history)
 
     saved = (builder.session_loader, builder.query_understanding, builder.finalize, dict(builder.SPECIALISTS),
              composer_node.ainvoke_with_retry, composer_node.build_messages, composer_node.get_chat_model,
@@ -84,7 +84,7 @@ async def run_flow(*, replies, reviews, specialist_status="success", reviewer_en
         builder.session_loader, builder.query_understanding, builder.finalize = fake_session, fake_qu, fake_finalize
         builder.SPECIALISTS["specialist_recommendation"] = fake_specialist
         composer_node.ainvoke_with_retry, composer_node.build_messages = fake_llm, spy_build
-        composer_node.get_chat_model = lambda: None
+        composer_node.get_chat_model = lambda temperature=0: None
         reviewer_node.get_review = fake_get_review
         validator_node._catalog_names = [COMB["name"]]
         get_settings().reviewer_enabled = reviewer_enabled

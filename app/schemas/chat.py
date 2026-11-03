@@ -8,7 +8,7 @@ ResponseType = Literal[
     "knowledge",
     "support",
     "clarification",
-    "out_of_scope",
+    "conversation",
     "fallback",
 ]
 

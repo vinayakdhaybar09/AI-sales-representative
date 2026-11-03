@@ -34,5 +34,5 @@ class ChatState(TypedDict, total=False):
     valid: bool                            # the response may be sent as it is
     reviewed: bool                         # the reviewer has already looked at this turn's reply
     excluded_item_ids: list[str]           # products the reviewer wants removed before the revision
-    # final result (built by out_of_scope / clarification / composer)
+    # final result (built by conversation / clarification / composer)
     response: ChatResponseBody

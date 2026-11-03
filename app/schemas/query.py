@@ -10,7 +10,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
-Intent = Literal["recommendation", "product_finalization", "comparison", "knowledge", "support"]
+Intent = Literal["recommendation", "product_finalization", "comparison", "knowledge", "support", "conversation"]
 Scope = Literal["in_scope", "out_of_scope"]
 
 
@@ -83,9 +83,9 @@ class QueryUnderstanding(BaseModel):
     @classmethod
     def _out_of_scope_is_a_scope(cls, data: Any) -> Any:
         """Small models sometimes answer intent='out_of_scope'. It is a scope value
-        (docs/CONTRACTS.md), so move it there and keep a neutral intent."""
+        (docs/CONTRACTS.md): move it there; such messages are handled by the conversation flow."""
         if isinstance(data, dict) and data.get("intent") == "out_of_scope":
-            data = {**data, "intent": "knowledge", "scope": "out_of_scope"}
+            data = {**data, "intent": "conversation", "scope": "out_of_scope"}
         return data
 
 

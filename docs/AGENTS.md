@@ -3,7 +3,7 @@
 Read this file fully before writing any code. It is the entry point; details live in `docs/`.
 
 ## What this project is
-Backend for an AI sales assistant for **Bombay Shaving Company (BSC)**. A user sends a natural-language message; the backend returns Markdown, an optional product tray (product cards), and optional suggested prompts. It currently handles these intents: `recommendation`, `product_finalization`, `comparison`, `knowledge`, `support`. The intent set is expected to evolve: do not treat it as fixed. Anything unrelated to BSC is politely declined (`out_of_scope`).
+Backend for an AI sales assistant for **Bombay Shaving Company (BSC)**. A user sends a natural-language message; the backend returns Markdown, an optional product tray (product cards), and optional suggested prompts. It currently handles these intents: `recommendation`, `product_finalization`, `comparison`, `knowledge`, `support`, plus `conversation` (greetings, small talk and off-topic messages, answered without retrieval). The intent set is expected to evolve: do not treat it as fixed. Anything unrelated to BSC is politely declined and redirected by the conversation node (`scope = out_of_scope` is only a hint).
 
 Stack: Python 3.11+, FastAPI, Uvicorn, Pydantic v2 / pydantic-settings, LangChain (model/embedding/retrieval abstraction), LangGraph (workflow), Neon PostgreSQL + pgvector, Mistral (`mistral-small-latest` chat, `mistral-embed` 1024-dim embeddings). Hugging Face is a **fallback only**. Frontend (separate repo) is React + `react-markdown`.
 
@@ -18,7 +18,7 @@ Stack: Python 3.11+, FastAPI, Uvicorn, Pydantic v2 / pydantic-settings, LangChai
 
 ## Hard rules (never violate)
 1. **Layering.** API routes → service → graph nodes → specialists → repositories/retrievers → DB. A layer must not reach past the one below it. Routes know HTTP only; repositories know SQL only; retrievers know vector search only; the `llm/` module is the only place that builds models.
-2. **Business logic is Python, not prompts.** SQL, metadata filtering, sufficiency rules, product-tray construction, and validation are plain Python. LLMs only do: query understanding (structured output), composing Markdown, and generating one clarification question.
+2. **Business logic is Python, not prompts.** SQL, metadata filtering, sufficiency rules, product-tray construction, and validation are plain Python. LLMs only do: query understanding (structured output), composing Markdown, generating one clarification question, writing short conversation replies (greetings/off-topic; no facts, checked by Python guardrails), and the reviewer's verdict.
 3. **The `products` table is the single source of truth** for price, availability, URL, image, and product details. Embeddings only *discover* candidate IDs. Never take price/availability/URL from embedding metadata or from LLM output.
 4. **The product tray is built in Python from specialist output.** The Composer LLM never writes tray fields. The tray may contain only products present in the Recommendation Specialist result.
 5. **Never invent** product names, prices, features, policies, URLs, or contact details. Use only what specialists returned.

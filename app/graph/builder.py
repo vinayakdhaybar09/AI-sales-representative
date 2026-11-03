@@ -1,11 +1,11 @@
 """app/graph/builder.py — wires the workflow (matches docs/ARCHITECTURE.md).
 
-START -> session_loader -> query_understanding -> out_of_scope | sufficiency
+START -> session_loader -> query_understanding -> conversation | sufficiency
 sufficiency -> clarification | specialist_<intent> -> composer
 (intents: recommendation, product_finalization, comparison, knowledge, support)
 specialist -> composer -> (validator | finalize); validator -> reviewer | composer (retry once) | fallback
 reviewer -> finalize | composer (the single revision; shared with the validator retry)
-out_of_scope / clarification / fallback -> finalize -> END
+conversation / clarification / fallback -> finalize -> END
 """
 
 from functools import lru_cache
@@ -15,9 +15,9 @@ from langgraph.graph import END, START, StateGraph
 from app.graph import routers
 from app.graph.nodes.clarification import clarification
 from app.graph.nodes.composer import composer
+from app.graph.nodes.conversation import conversation
 from app.graph.nodes.fallback import fallback
 from app.graph.nodes.finalize import finalize
-from app.graph.nodes.out_of_scope import out_of_scope
 from app.graph.nodes.query_understanding import query_understanding
 from app.graph.nodes.reviewer import reviewer
 from app.graph.nodes.session_loader import session_loader
@@ -47,7 +47,7 @@ def get_graph():
     g = StateGraph(ChatState)
     g.add_node("session_loader", session_loader)
     g.add_node("query_understanding", query_understanding)
-    g.add_node("out_of_scope", out_of_scope)
+    g.add_node("conversation", conversation)
     g.add_node("sufficiency", sufficiency)
     g.add_node("clarification", clarification)
     for name, node in SPECIALISTS.items():
@@ -62,7 +62,7 @@ def get_graph():
     g.add_edge("session_loader", "query_understanding")
     g.add_conditional_edges(
         "query_understanding", routers.after_query_understanding,
-        {"out_of_scope": "out_of_scope", "sufficiency": "sufficiency"},
+        {"conversation": "conversation", "sufficiency": "sufficiency"},
     )
     g.add_conditional_edges(
         "sufficiency", routers.after_sufficiency,
@@ -80,7 +80,7 @@ def get_graph():
     g.add_conditional_edges(
         "reviewer", routers.after_reviewer, {"finalize": "finalize", "composer": "composer"}
     )
-    for name in ("out_of_scope", "clarification", "fallback"):
+    for name in ("conversation", "clarification", "fallback"):
         g.add_edge(name, "finalize")
     g.add_edge("finalize", END)
     return g.compile()

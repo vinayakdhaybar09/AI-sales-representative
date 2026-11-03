@@ -19,6 +19,9 @@ from app.schemas.specialist import SpecialistOutput
 
 _AMOUNT = re.compile(r"(?:₹|\bRs\.?|\bINR)\s?(\d[\d,]*(?:\.\d+)?)", re.IGNORECASE)
 _NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
+_DURATION = re.compile(
+    r"\b(\d+(?:\s*(?:-|–|to)\s*\d+)?)\s*(?:business\s+|working\s+)?(?:days?|hours?|weeks?|months?)\b", re.IGNORECASE
+)
 _URL = re.compile(r"https?://[^\s)\]>\"'<]+")
 _EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+")
 _BOLD = re.compile(r"\*\*(.+?)\*\*")
@@ -96,6 +99,7 @@ def validate(
     response: ChatResponseBody,
     result: SpecialistOutput,
     catalog_names: list[str],
+    request_text: str = "",
 ) -> ValidationResult:
     out = ValidationResult()
     md = response.markdown or ""
@@ -116,10 +120,19 @@ def validate(
     _check_tray(response, result, out)
 
     # 3. amounts: every price quoted must exist in the specialist data
-    allowed_numbers = {_float(n) for n in _NUMBER.findall(data_text)}
+    # The customer's own numbers (a budget they typed) may be echoed back: they are not claims about our data.
+    allowed_numbers = {_float(n) for n in _NUMBER.findall(data_text + " " + request_text)}
     for amount in _AMOUNT.findall(md):
         if _float(amount) not in allowed_numbers:
             out.critical.append(f"amount ₹{amount} does not appear in the specialist data")
+
+    # 3b. time periods ("2-3 business days"): invented delivery or refund times are the riskiest claim,
+    #     so for support answers a period that is not in the data is critical (elsewhere it is a note).
+    for period in _DURATION.finditer(md):
+        figures = {_float(n) for n in _NUMBER.findall(period.group(1))}
+        if not figures <= allowed_numbers:
+            message = f"time period '{period.group(0).strip()}' does not appear in the specialist data"
+            (out.critical if result.specialist == "support" else out.non_critical).append(message)
 
     # 4. URLs: unknown URLs are invented; product URLs/images belong in the tray, not prose
     product_urls = set()

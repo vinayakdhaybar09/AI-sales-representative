@@ -25,7 +25,9 @@ async def _get_catalog_names() -> list[str]:
 
 async def validator(state: ChatState) -> dict:
     """Deterministic check of the composed response against the specialist output."""
-    check = validate(state["response"], state["specialist_result"], await _get_catalog_names())
+    query = state.get("query")
+    request_text = f"{state.get('message', '')} {query.resolved_request if query else ''}"
+    check = validate(state["response"], state["specialist_result"], await _get_catalog_names(), request_text)
     cid = state["conversation_id"]
     for note in check.non_critical:
         logger.info("Validator note (conversation_id=%s): %s", cid, note)
