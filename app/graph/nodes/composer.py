@@ -6,7 +6,8 @@ from app.llm.models import get_chat_model
 from app.llm.prompts.composer import build_messages
 from app.llm.retry import ainvoke_with_retry
 from app.response.empty_replies import empty_reply
-from app.response.envelope import fallback_body
+from app.graph.nodes.fallback import build_fallback
+from app.response.fallbacks import SERVICE, SPECIALIST_ERROR
 from app.response.review import apply_exclusions
 from app.response.tray import build_tray
 from app.schemas.chat import ChatResponseBody
@@ -30,7 +31,7 @@ async def composer(state: ChatState) -> dict:
         return {"response": empty_reply(result, state["message"]), "valid": True}
     if result.status == "error":
         logger.warning("Composer: specialist error, fallback (conversation_id=%s)", cid)
-        return {"response": fallback_body(), "valid": True}
+        return {"response": build_fallback(state, SPECIALIST_ERROR), "valid": True}
 
     # The reviewer may have found products that do not address the request: compose without them.
     excluded = state.get("excluded_item_ids") or []
@@ -50,7 +51,7 @@ async def composer(state: ChatState) -> dict:
         markdown = reply.content.strip() if isinstance(reply.content, str) else ""
     except Exception:
         logger.exception("Composer LLM call failed (conversation_id=%s)", cid)
-        return {"response": fallback_body(), "valid": True, "composer_attempts": attempts, "specialist_result": result}
+        return {"response": build_fallback(state, SERVICE), "valid": True, "composer_attempts": attempts, "specialist_result": result}
 
     logger.info("Composer attempt %d done (conversation_id=%s, markdown_length=%d)", attempts, cid, len(markdown))
     return {

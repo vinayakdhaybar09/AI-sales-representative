@@ -43,3 +43,25 @@ def normalize_gender(value: str | None) -> str | None:
     if v in {"women", "woman", "female", "womens", "women's", "girl", "her"}:
         return "women"
     return None
+
+
+_FILLER = {"the", "a", "an", "this", "that", "these", "those", "one", "ones", "first", "second", "third", "of", "my", "your"}
+
+
+def match_shown_products(term: str, shown: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Which of the products shown last does `term` mean? ("the cream" -> Hair Removal Cream).
+
+    Exact name first; otherwise every shown product whose name + category contains
+    all of the term's meaningful words. Pure logic; the caller decides what to do
+    when this returns none (several = ambiguous).
+    """
+    wanted = (term or "").strip().lower()
+    if not wanted:
+        return []
+    exact = [p for p in shown if p["name"].strip().lower() == wanted]
+    if exact:
+        return exact[:1]
+    words = _tokens(wanted) - _FILLER
+    if not words:
+        return []
+    return [p for p in shown if words <= _tokens(f"{p['name']} {p.get('category') or ''}".replace("_", " "))]

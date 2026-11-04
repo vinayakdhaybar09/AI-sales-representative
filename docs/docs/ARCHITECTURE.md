@@ -72,7 +72,7 @@ Clarify on the single most decisive missing field (e.g. trimmer → `use_case`: 
 ## Specialists (each returns data, never final prose)
 - **Recommendation**: semantic search over product embeddings (top-k) → candidate product IDs → SQL lookup in `products` → apply filters (budget, category, gender, etc.) → rank (default: similarity order) → full product records. May pull blog chunks for context.
 - **Product finalization**: narrows options down to the best 1–3 (`filters.result_limit`). Candidates = the products shown earlier (the saved pool); with no pool, or when the criteria rule out all of it, it runs the recommendation search and picks from that. Python picks (budget/exclusions → in-stock only → priority or a quality score from review-weighted rating, fit to stated needs and match score) and writes `selection_reasons`; the Composer only explains. The tray holds the pick(s) as featured cards (rank, description, benefits, how to use). Details: `docs/CONTRACTS.md`.
-- **Comparison**: resolve 2+ products (direct SQL by name/ID match, embeddings as fallback) → structured comparison fields from `products`.
+- **Comparison**: resolve 2+ products (first the products just shown, matched by name/category words, e.g. "the cream"; then direct SQL by name/ID match, embeddings as fallback) → structured comparison fields from `products`.
 - **Knowledge**: blog-chunk semantic search (`source_type='blog'`) + product info via SQL when a product is named.
 - **Support**: semantic search over `source_type='support'` (FAQs + policies). No order lookup. Return the tracking link and `care@bombayshavingcompany.com` as found in the retrieved data.
 
@@ -93,6 +93,7 @@ One shared persona text (`app/llm/prompts/voice.py`): friendly, slightly casual,
 **Non-critical (log only):** Markdown quality, optional badges, optional source metadata, wording.
 Implemented checks (`app/response/validator.py`): type/structure, time periods ("2-3 business days") that are not in the data (critical for support, a note elsewhere); amounts the customer typed themselves may be echoed, non-empty Markdown, no raw HTML/CSS markup, tray equals specialist products field by field (empty for non-recommendation), every ₹ amount / URL / email in the Markdown exists in the specialist data, a bolded catalog product not in the result, out-of-stock product without "Currently out of stock", customer-specific order claims. It is heuristic and cannot prove every sentence is grounded.
 The **Reviewer** (`app/graph/nodes/reviewer.py`, `app/llm/prompts/reviewer.py`, pure helpers in `app/response/review.py`) is a separate, specialist-independent LLM layer on top of the deterministic checks. It skips fixed replies, errors, greetings, clarifications and out-of-scope answers; it can be switched off with `REVIEWER_ENABLED=false`. Dropping products is limited to recommendation and product_finalization (comparison needs all its products); when none remain the Composer gets warning `no_suitable_products`.
+Fallback replies (`app/response/fallbacks.py`) are templates chosen by reason (`unverified`, `service`, `specialist_error`) and context (the products or category being discussed); no model call.
 Specialist `empty` results get a fixed reply (`app/response/empty_replies.py`, no LLM, no validation); `error` results go straight to `fallback`.
 
 ## Conversation state

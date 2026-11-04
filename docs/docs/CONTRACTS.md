@@ -35,13 +35,14 @@ Response envelope (always these four keys):
 - Failure: `{"success": false, "conversation_id": "...", "response": null, "error": {"code": "...", "message": "..."}}` for every `/api/*` failure, including 422 (`conversation_id` is `""` if the body had none). HTTP status follows the code: `invalid_request` 422, `rate_limited` 429, `internal_error` 500, `upstream_unavailable` 503, `service_unavailable` 503, `upstream_timeout` 504. Messages are client-safe (no traces, keys or internals).
 - `GET /health` → `{"status":"ok","service":"bsc-backend"}`.
 
-Fallback response body:
+Fallback response body (type, empty tray and prompts are fixed; the text depends on the reason):
 ```json
 { "type": "fallback",
-  "markdown": "I’m unable to verify the exact details right now. Please try again or ask about a specific product or category.",
+  "markdown": "Good question! I can't confirm the details for Hair Removal Cream and Hair Removal Spray with confidence right now, so I won't guess. I can walk you through what each one is for, or look at something else, whichever helps.",
   "product_tray": [],
   "suggested_prompts": ["Suggest a trimmer for body grooming", "Compare two trimmers"] }
 ```
+Reasons (`app/response/fallbacks.py`, templates only, no model call): `unverified` (the reply failed deterministic validation after the one revision), `service` (the model failed while writing), `specialist_error` (the lookup failed). For `unverified` the text names the products the customer was asking about (from the resolved request, or the products just shown for a comparison) or the category being discussed, otherwise it asks for a product or category. Product names always come from our own data. Support and knowledge questions never get product names.
 
 ## Query Understanding output (`app/schemas/query.py`)
 ```json
@@ -86,6 +87,8 @@ Fallback response body:
 - `finalized_product_ids` is the latest pick (1–3 IDs). A new `recommendation` clears it.
 - `preferences` is the **structured memory** of what the customer has told us, merged in Python after every in-scope turn from the extracted `entities` and `filters` (no extra LLM call): `category`, `use_case`, `body_area`, `skin_type`, `hair_type`, `gender`, `budget_min`, `budget_max`, `required_features`, `exclusions`. A new non-empty value replaces a single value; list values are added without duplicates (max 8). When the category changes, the need-specific fields (`use_case`, `body_area`, `required_features`, `exclusions`, `budget_min`, `budget_max`) are reset; personal fields (`skin_type`, `hair_type`, `gender`) are kept. It is passed to Query Understanding and used by `product_finalization`; nothing else reads it yet.
 - If a `product_finalization` message arrives with no pool (new or expired conversation), the specialist runs the recommendation search itself and picks from those results (or, when required details are missing, the normal sufficiency/clarification rules apply first).
+
+**Not stored:** `shown_products` (`[{id, name, category, picked}]`) is looked up from `previous_product_ids` by the session loader on every request. Query Understanding uses it to resolve "the first two", "the cream", "the second one" to exact product names, and the comparison specialist matches names against it before searching the catalogue.
 
 ## Specialist output (`app/schemas/specialist.py`)
 ```json

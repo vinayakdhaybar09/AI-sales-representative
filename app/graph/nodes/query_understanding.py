@@ -17,10 +17,11 @@ async def understand(
     history: list[dict[str, str]],
     pending: dict | None = None,
     preferences: dict | None = None,
+    shown_products: list[dict] | None = None,
 ) -> QueryUnderstanding:
     """Ask the chat model for a structured reading of `message`."""
     model = get_chat_model().with_structured_output(QueryUnderstanding)
-    result = await ainvoke_with_retry(model, build_messages(message, history, pending, preferences))
+    result = await ainvoke_with_retry(model, build_messages(message, history, pending, preferences, shown_products))
     if not isinstance(result, QueryUnderstanding):
         raise ValueError("Query Understanding returned no structured output")
     return result
@@ -35,7 +36,7 @@ async def query_understanding(state: ChatState) -> dict:
     """
     pending = state.get("pending_clarification")
     query = await understand(
-        state["message"], state.get("history", []), pending, state.get("preferences")
+        state["message"], state.get("history", []), pending, state.get("preferences"), state.get("shown_products")
     )
     # Product IDs come from our own state, never from the LLM.
     query.context.previously_mentioned_product_ids = list(state.get("previous_product_ids", []))

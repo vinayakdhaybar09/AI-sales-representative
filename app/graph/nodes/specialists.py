@@ -47,7 +47,8 @@ specialist_product_finalization = _node(
     ),
 )
 specialist_comparison = _node(
-    "comparison", lambda conn, s: comparison.run(conn, s["query"], s.get("previous_product_ids", []))
+    "comparison",
+    lambda conn, s: comparison.run(conn, s["query"], s.get("previous_product_ids", []), s.get("shown_products")),
 )
 specialist_knowledge = _node(
     "knowledge", lambda conn, s: knowledge.run(conn, s["query"], s["search_text"])

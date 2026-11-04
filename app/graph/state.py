@@ -22,6 +22,8 @@ class ChatState(TypedDict, total=False):
     pool_match_scores: dict[str, float]    # product_id -> similarity score of that list
     finalized_product_ids: list[str]       # the latest product_finalization pick
     preferences: dict[str, Any]            # structured memory of what the customer told us
+    shown_products: list[dict[str, Any]]   # [{id, name, category, picked}] from the last answer, in the order shown (not stored)
+    fallback_reason: str                   # why the fallback is used: unverified | service | specialist_error
     # produced along the way
     query: QueryUnderstanding
     pending_resolved: bool                 # this message answered a pending clarification

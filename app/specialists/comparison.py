@@ -13,7 +13,7 @@ from app.db.repositories.products import find_products_by_name, get_products_by_
 from app.retrieval.search import search
 from app.schemas.query import QueryUnderstanding
 from app.schemas.specialist import SpecialistOutput
-from app.specialists.products import to_record
+from app.specialists.products import match_shown_products, to_record
 
 logger = logging.getLogger(__name__)
 
@@ -42,13 +42,23 @@ async def run(
     conn: psycopg.AsyncConnection,
     query: QueryUnderstanding,
     previous_ids: list[str],
+    shown_products: list[dict] | None = None,
 ) -> SpecialistOutput:
     warnings: list[str] = []
     resolved: dict[str, dict] = {}
     unresolved: list[str] = []
 
     for name in query.entities.products:
-        rows = await _resolve(conn, name, warnings)
+        # "the cream" / "the spray" mean products we just showed: try those before searching the catalogue.
+        shown = match_shown_products(name, shown_products or [])
+        if shown:
+            rows = await get_products_by_ids(conn, [p["id"] for p in shown])
+            if len(rows) > 1:
+                warnings.append(f"ambiguous_product_name: '{name}' matches {len(rows)} products")
+        else:
+            rows = []
+        if not rows:
+            rows = await _resolve(conn, name, warnings)
         if not rows:
             unresolved.append(name)
         for row in rows:
