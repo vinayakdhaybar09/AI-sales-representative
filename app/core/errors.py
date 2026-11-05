@@ -30,12 +30,14 @@ UPSTREAM_TIMEOUT = "upstream_timeout"
 UPSTREAM_UNAVAILABLE = "upstream_unavailable"
 SERVICE_UNAVAILABLE = "service_unavailable"
 INTERNAL_ERROR = "internal_error"
+NOT_FOUND = "not_found"
 
 _ERRORS = {
     RATE_LIMITED: AppError(RATE_LIMITED, "The assistant is very busy right now. Please try again in a moment.", 429),
     UPSTREAM_TIMEOUT: AppError(UPSTREAM_TIMEOUT, "The assistant took too long to respond. Please try again.", 504),
     UPSTREAM_UNAVAILABLE: AppError(UPSTREAM_UNAVAILABLE, "The AI service is temporarily unavailable. Please try again shortly.", 503),
     SERVICE_UNAVAILABLE: AppError(SERVICE_UNAVAILABLE, "The service is not available right now. Please try again later.", 503),
+    NOT_FOUND: AppError(NOT_FOUND, "We couldn't find that.", 404),
     INTERNAL_ERROR: AppError(INTERNAL_ERROR, "Something went wrong while processing your message. Please try again.", 500),
 }
 
@@ -44,6 +46,10 @@ STATUS_BY_CODE = {code: err.status for code, err in _ERRORS.items()} | {INVALID_
 
 def invalid_request(message: str) -> AppError:
     return AppError(INVALID_REQUEST, message, 422)
+
+
+def not_found(message: str) -> AppError:
+    return AppError(NOT_FOUND, message, 404)
 
 
 def classify(exc: BaseException) -> AppError:

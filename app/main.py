@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from app.api.error_handlers import register_error_handlers
-from app.api.routes import chat, health
+from app.api.routes import chat, health, products
 from app.core.config import get_settings
 from app.core.logging import setup_logging
 from app.db.connection import open_pool, close_pool
@@ -36,6 +36,7 @@ app = FastAPI(
 register_error_handlers(app)
 app.include_router(health.router)
 app.include_router(chat.router)
+app.include_router(products.router)
 
 # Dev-only vector search; never exposed outside development.
 if get_settings().app_env == "development":

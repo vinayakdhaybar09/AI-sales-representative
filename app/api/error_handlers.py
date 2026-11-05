@@ -13,7 +13,7 @@ from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.core.errors import INTERNAL_ERROR, INVALID_REQUEST, STATUS_BY_CODE, classify
+from app.core.errors import INTERNAL_ERROR, INVALID_REQUEST, STATUS_BY_CODE, AppError, classify
 from app.response.envelope import error_envelope
 
 logger = logging.getLogger(__name__)
@@ -47,6 +47,12 @@ def register_error_handlers(app: FastAPI) -> None:
             return await request_validation_exception_handler(request, exc)
         envelope = error_envelope(_conversation_id_from(exc.body), INVALID_REQUEST, _validation_message(exc))
         return JSONResponse(status_code=422, content=envelope.model_dump(mode="json"))
+
+    @app.exception_handler(AppError)
+    async def on_app_error(request: Request, exc: AppError):
+        """Expected, client-safe failures (e.g. an unknown product id): the standard envelope, no error log."""
+        envelope = error_envelope("", exc.code, exc.message)
+        return JSONResponse(status_code=exc.status, content=envelope.model_dump(mode="json"))
 
     @app.exception_handler(Exception)
     async def on_unhandled_error(request: Request, exc: Exception):
