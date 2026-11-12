@@ -12,7 +12,7 @@ import psycopg
 from app.db.repositories.products import find_products_by_name, get_products_by_ids
 from app.retrieval.search import search
 from app.schemas.query import QueryUnderstanding
-from app.schemas.specialist import SpecialistOutput
+from app.schemas.specialist import MAX_COMPARED_PRODUCTS as MAX_PRODUCTS, SpecialistOutput
 from app.specialists.products import match_shown_products, to_record
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ FUZZY_MIN_SCORE = 0.75
 MAX_PER_NAME = 3
 COMPARABLE_FIELDS = [
     "price", "original_price", "rating", "review_count", "availability",
-    "category", "details.features", "details.specifications",
+    "category", "description", "details.features", "details.detailed_information.benefits", "details.specifications",
 ]
 
 
@@ -61,7 +61,8 @@ async def run(
             rows = await _resolve(conn, name, warnings)
         if not rows:
             unresolved.append(name)
-        for row in rows:
+        # One product per name the customer said: several matches ("the spray") are reported, not all compared.
+        for row in rows[:1]:
             resolved.setdefault(row["id"], row)
 
     # Top up from products shown earlier ("compare it with the first one").
@@ -70,6 +71,10 @@ async def run(
             resolved.setdefault(row["id"], row)
             if len(resolved) >= 2:
                 break
+
+    if len(resolved) > MAX_PRODUCTS:
+        warnings.append(f"comparison_capped: compared the first {MAX_PRODUCTS} of {len(resolved)} products")
+        resolved = dict(list(resolved.items())[:MAX_PRODUCTS])
 
     if len(resolved) < 2:
         warnings.append("could_not_resolve_two_products")

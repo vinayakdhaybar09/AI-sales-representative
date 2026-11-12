@@ -8,6 +8,7 @@ from app.llm.retry import ainvoke_with_retry
 from app.response.empty_replies import empty_reply
 from app.graph.nodes.fallback import build_fallback
 from app.response.fallbacks import SERVICE, SPECIALIST_ERROR
+from app.response.comparison_table import build_comparison_table
 from app.response.review import apply_exclusions
 from app.response.tray import build_tray
 from app.schemas.chat import ChatResponseBody
@@ -55,7 +56,10 @@ async def composer(state: ChatState) -> dict:
 
     logger.info("Composer attempt %d done (conversation_id=%s, markdown_length=%d)", attempts, cid, len(markdown))
     return {
-        "response": ChatResponseBody(type=result.specialist, markdown=markdown, product_tray=build_tray(result)),
+        "response": ChatResponseBody(
+            type=result.specialist, markdown=markdown,
+            product_tray=build_tray(result), comparison_table=build_comparison_table(result),
+        ),
         "composer_attempts": attempts,
         "valid": False,   # not valid until the validator says so
         # Kept in state so the validator, the tray and `finalize` all see the same (possibly trimmed) products.

@@ -32,6 +32,8 @@ If no item genuinely addresses the request, list all of them.
 
 Rules:
 - Do NOT judge tone, length, wording or formatting.
+- For a comparison the customer also gets an attribute table (price, availability, rating, description, benefits, features) \
+built from the evidence; the reply only has to introduce it and say when to pick each product.
 - Do NOT reject a reply for honestly saying the shop does not have something. An honest "we don't have X" followed by a \
 closest alternative with a reason from the evidence is FULFILLED.
 - Flag "missing" only when a stated requirement is ignored. Do NOT flag it because the reply could explain more, compare more deeply \

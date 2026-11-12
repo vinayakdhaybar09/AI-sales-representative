@@ -41,12 +41,28 @@ class ProductCard(BaseModel):
     key_benefits: list[str] = Field(default_factory=list)
     selection_reasons: list[str] = Field(default_factory=list)
 
+class ComparisonRow(BaseModel):
+    """One criterion of the comparison table: one cell per product, in column order."""
+
+    key: str
+    label: str
+    cells: list[list[str]]        # a cell is a list of short lines; [] means "no data" (the UI shows a dash)
+
+
+class ComparisonTable(BaseModel):
+    """The fixed comparison table (type "comparison"): product columns x criteria rows."""
+
+    products: list[ProductCard]   # 2-3 columns: image, name, price, buttons are drawn from these
+    rows: list[ComparisonRow]
+
+
 class ChatResponseBody(BaseModel):
     """The 'response' part of the envelope."""
 
     type: ResponseType
     markdown: str
     product_tray: list[ProductCard] = Field(default_factory=list)
+    comparison_table: ComparisonTable | None = None   # only for type "comparison"; its tray stays empty
     suggested_prompts: list[str] = Field(default_factory=list)
 
 class ErrorInfo(BaseModel):

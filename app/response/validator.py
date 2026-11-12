@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 
 from app.response.tray import TRAY_SPECIALISTS, card_extras, featured_extras
 from app.schemas.chat import ChatResponseBody
-from app.schemas.specialist import SpecialistOutput
+from app.schemas.specialist import MAX_COMPARED_PRODUCTS as MAX_PRODUCTS, SpecialistOutput
 
 _AMOUNT = re.compile(r"(?:₹|\bRs\.?|\bINR)\s?(\d[\d,]*(?:\.\d+)?)", re.IGNORECASE)
 _NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
@@ -63,6 +63,39 @@ def _has_order_claim(markdown: str) -> bool:
 
 def _clean_url(url: str) -> str:
     return url.rstrip(".,;:!?")
+
+
+_MD_TABLE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$", re.MULTILINE)
+
+
+def _check_comparison(response: ChatResponseBody, result: SpecialistOutput, out: ValidationResult) -> None:
+    """The comparison table is built in Python: it must match the specialist data, and the prose must not repeat it as a table."""
+    if result.specialist != "comparison":
+        if response.comparison_table is not None:
+            out.critical.append("a comparison table is attached to a non-comparison answer")
+        return
+    if _MD_TABLE.search(response.markdown):
+        out.critical.append("the reply contains a Markdown table; the comparison table is shown separately, write only the short verdict")
+    table = response.comparison_table
+    expected = result.data.get("products", [])[:MAX_PRODUCTS]
+    if table is None or len(table.products) != len(expected):
+        out.critical.append(f"comparison table has {len(table.products) if table else 0} products but the specialist returned {len(expected)}")
+        return
+    for card, product in zip(table.products, expected):
+        wrong = [
+            key for key, ok in (
+                ("product_id", card.product_id == str(product["id"])),
+                ("name", card.name == product["name"]),
+                ("price", card.price == float(product["price"])),
+                ("image_url", card.image_url == (product.get("image_url") or "")),
+                ("product_url", card.product_url == (product.get("url") or "")),
+                ("availability", card.availability == product["availability"]),
+            ) if not ok
+        ]
+        if wrong:
+            out.critical.append(f"comparison column '{card.name}' differs from specialist data: {', '.join(wrong)}")
+    if any(len(row.cells) != len(table.products) for row in table.rows):
+        out.critical.append("a comparison row does not have one cell per product")
 
 
 def _check_tray(response: ChatResponseBody, result: SpecialistOutput, out: ValidationResult) -> None:
@@ -118,6 +151,7 @@ def validate(
 
     # 2. tray
     _check_tray(response, result, out)
+    _check_comparison(response, result, out)
 
     # 3. amounts: every price quoted must exist in the specialist data
     # The customer's own numbers (a budget they typed) may be echoed back: they are not claims about our data.

@@ -92,10 +92,11 @@ INTENT_RULES = {
         "No table and no long list of features."
     ),
     "comparison": (
-        "Write one Markdown table comparing the products (one column per product; rows such as price, "
-        "rating, availability, key features, specifications that are in the data). Bold only product names. "
-        "Follow with 1-2 sentences saying when you would pick each one, using only the data (price, rating, features). "
-        "Do not declare a winner unless the data supports it."
+        "The customer sees a comparison table next to your text (images, price, availability, rating, description, benefits, "
+        "features), so do NOT write a table or repeat those attributes. Write one short opener naming the products in bold, "
+        "then 2-4 short points on when to pick each one ('Pick X if ...'), using only the data. Mention it in plain words if a "
+        "warning says a name matched several products or only some were compared, and say a product is 'Currently out of stock' "
+        "when it is. Do not declare a winner unless the data supports it. Never write image or product links."
     ),
     "knowledge": (
         "Answer the question directly in the first sentence, in plain friendly words, then give at most 4 short points from the article "
@@ -127,7 +128,7 @@ def _product_view(p: dict[str, Any], with_specs: bool) -> dict[str, Any]:
         view["rank"] = p["rank"]
         view["selection_reasons"] = p.get("selection_reasons") or []
     if with_specs:
-        specs = {k: v for k, v in (details.get("specifications") or {}).items() if k != "options"}
+        specs = {k: v for k, v in (details.get("specifications") or {}).items() if k in ("weight_grams",)}
         view["specifications"] = {k: clean_text(v, 80) for k, v in list(specs.items())[:8]}
     return view
 

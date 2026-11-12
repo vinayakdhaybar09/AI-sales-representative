@@ -15,9 +15,10 @@ def _history_text(response: ChatResponseBody) -> str:
     A full product answer is long and the products are already in the tray, so
     we keep just who was shown (cheaper for the LLM, and enough context).
     """
-    if response.product_tray:
-        names = ", ".join(f"{c.name} (₹{c.price:g})" for c in response.product_tray)
-        label = "Picked as the best option" if response.type == "product_finalization" else "Showed products"
+    cards = response.product_tray or (response.comparison_table.products if response.comparison_table else [])
+    if cards:
+        names = ", ".join(f"{c.name} (₹{c.price:g})" for c in cards)
+        label = {"product_finalization": "Picked as the best option", "comparison": "Compared"}.get(response.type, "Showed products")
         return f"{label}: {names}"
     text = response.markdown
     return text if len(text) <= MAX_STORED_REPLY_CHARS else text[:MAX_STORED_REPLY_CHARS].rsplit(" ", 1)[0] + "…"

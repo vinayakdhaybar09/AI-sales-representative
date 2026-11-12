@@ -21,6 +21,7 @@ Response envelope (always these four keys):
         "rating": 4.79, "review_count": 202, "original_price": 149.0,
         "rank": null, "description": null, "key_benefits": [], "selection_reasons": [] }
     ],
+    "comparison_table": null,
     "suggested_prompts": []
   },
   "error": null
@@ -29,7 +30,8 @@ Response envelope (always these four keys):
 - `type` ∈ `recommendation | product_finalization | comparison | knowledge | support | clarification | conversation | fallback`.
 - `availability` ∈ `in_stock | out_of_stock` (a deliberate addition to the original design doc).
 - `rating`, `review_count`, `original_price` on tray cards are optional (null): rating/review_count are null when the product has no reviews (never 0.0); `original_price` is set only when higher than `price`. All come from the `products` table.
-- `product_tray` is non-empty only for `recommendation` (up to 5 cards) and `product_finalization` (1–3 cards). Every other response type: `[]`.
+- `product_tray` is non-empty only for `recommendation` (up to 5 cards) and `product_finalization` (1–3 cards). Every other response type: `[]` (a comparison has no tray: its table header carries the products).
+- **Comparison table** (`type: "comparison"` only; `null` everywhere else, and `null` when fewer than two products could be resolved): `{ "products": ProductCard[2..3], "rows": [{ "key", "label", "cells": [[str, ...], ...] }] }`. Built in Python (`app/response/comparison_table.py`), never by the model. `products` are the columns (image, name, price, availability, rating, URLs, same fields as a tray card); every row has one cell per product, in column order; a cell is a list of short lines and `[]` means "no data" (the frontend shows a dash). Rows come in a fixed order and a row nobody has data for is dropped: `price` (second line `was ₹X · save N%` for a real discount), `availability`, `rating` (`No ratings yet` without reviews), `description`, `benefits`, `features`, then a `spec:weight_grams` row (Weight) when at least two products have it; internal fields (sku, barcode) are never shown. The markdown of a comparison is only a short opener and a "pick X if…" verdict (a Markdown table in it is rejected by the validator). At most 3 products are compared; more are cut with warning `comparison_capped`.
 - **Featured cards** (`type: "product_finalization"` only; always `null` / `[]` on `recommendation` cards): `rank` (1 = top pick, 2, 3), `description` (markup stripped, max ~500 chars), `key_benefits` (≤5 short strings: the product's benefits, or its features when it lists no benefits), `selection_reasons` (short factual strings saying why it was picked). Any of them can be empty (some products have no benefits text); the frontend hides empty sections.
 - **Featured layout** (frontend): every card has the same size and structure (image with the View details / Add to cart buttons on the left, details on the right), shown in `rank` order in a horizontally scrollable tray, whether there are 1, 2 or 3 cards.
 - Failure: `{"success": false, "conversation_id": "...", "response": null, "error": {"code": "...", "message": "..."}}` for every `/api/*` failure, including 422 (`conversation_id` is `""` if the body had none). HTTP status follows the code: `invalid_request` 422, `rate_limited` 429, `not_found` 404, `internal_error` 500, `upstream_unavailable` 503, `service_unavailable` 503, `upstream_timeout` 504. Messages are client-safe (no traces, keys or internals).
@@ -106,17 +108,17 @@ Reasons (`app/response/fallbacks.py`, templates only, no model call): `unverifie
   4. Rank: by `filters.priority` when given (`lowest_price`, `highest_rated`); otherwise a quality score = review-weighted rating (a product with few reviews does not beat a well-reviewed one on rating alone) + fit to the stated needs (words from use case, skin/hair type, required features found in the product text) + the original `match_score`.
   5. Cut to the requested count (`filters.result_limit`); fewer qualifying products → warning `fewer_results_than_requested`.
   `selection_reasons` are short factual strings per product ("rated 4.8/5 from 202 reviews", "₹299, within your ₹300 budget", "in stock", "fits: sensitive skin") built in Python from the row. The Composer turns them into a salesperson-style explanation and may not add claims beyond the data. Nothing qualifies, even after the fresh search → `status: "empty"` with warning `no_products_match_criteria` (fixed reply, no LLM).
-- comparison: `{products: [full rows], comparable_fields: [...], unresolved: [names]}`; ambiguous or fuzzy name matches add warnings.
+- comparison: `{products: [full rows], comparable_fields: [...], unresolved: [names]}`; one product per name the customer said (an ambiguous name compares the best match and adds a warning), at most 3 products in total.
 - knowledge: `{chunks: [{source_id,title,heading,category,url,content,score}], products: [full rows for named products]}`.
 - support: `{items: [{source_id,kind,category,content,score}], contact_info: {tracking_url, care_email}, live_order_data_available: false}`.
-Warnings used so far: `trimmer_model_not_identified`, `shipping_charges_differ_between_sources`, `returns_wording_differs_between_sources`, `ambiguous_product_name`, `fuzzy_match`, `category_not_matched`, `no_products_within_budget`, `includes_out_of_stock`, `selected_out_of_stock`, `no_products_match_criteria`, `fewer_results_than_requested`, `widened_search`, `no_suitable_products`, `no_relevant_*`, `could_not_resolve_two_products`, `specialist_failed`.
+Warnings used so far: `trimmer_model_not_identified`, `shipping_charges_differ_between_sources`, `returns_wording_differs_between_sources`, `ambiguous_product_name`, `fuzzy_match`, `category_not_matched`, `no_products_within_budget`, `includes_out_of_stock`, `selected_out_of_stock`, `no_products_match_criteria`, `fewer_results_than_requested`, `widened_search`, `no_suitable_products`, `no_relevant_*`, `could_not_resolve_two_products`, `comparison_capped`, `specialist_failed`.
 
 ## Composer output (internal)
 ```json
 { "type": "recommendation", "markdown": "...", "product_tray": [],
   "metadata": { "specialists_used": [], "sources": [] } }
 ```
-The envelope's `response` = `type, markdown, product_tray, suggested_prompts` (metadata stays internal).
+The envelope's `response` = `type, markdown, product_tray, comparison_table, suggested_prompts` (metadata stays internal).
 
 ## Reviewer verdict (`app/schemas/review.py`, internal)
 ```json

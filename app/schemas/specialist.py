@@ -5,6 +5,9 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 
+MAX_COMPARED_PRODUCTS = 3   # a comparison table has 2-3 product columns
+
+
 class SpecialistOutput(BaseModel):
     specialist: Literal["recommendation", "product_finalization", "comparison", "knowledge", "support"]
     status: Literal["success", "empty", "error"]
