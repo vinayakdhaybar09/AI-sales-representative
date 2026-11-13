@@ -60,3 +60,23 @@ async def save(
     except Exception:
         logger.warning("Could not save conversation (conversation_id=%s); continuing",
                        conversation_id, exc_info=True)
+
+
+async def add_assistant_note(conversation_id: str, text: str) -> None:
+    """Append one assistant line to an existing conversation (used after a query is submitted).
+
+    A conversation that no longer exists is left alone, and any storage problem is logged and skipped.
+    """
+    stored = await load(conversation_id)
+    if not stored.get("history"):
+        return
+    await save(
+        conversation_id,
+        [*stored["history"], {"role": "assistant", "content": text}],
+        stored.get("previous_product_ids", []),
+        stored.get("pending_clarification"),
+        pool_search_text=stored.get("pool_search_text"),
+        pool_match_scores=stored.get("pool_match_scores"),
+        finalized_product_ids=stored.get("finalized_product_ids"),
+        preferences=stored.get("preferences"),
+    )

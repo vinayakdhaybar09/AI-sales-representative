@@ -20,6 +20,8 @@ def _history_text(response: ChatResponseBody) -> str:
         names = ", ".join(f"{c.name} (₹{c.price:g})" for c in cards)
         label = {"product_finalization": "Picked as the best option", "comparison": "Compared"}.get(response.type, "Showed products")
         return f"{label}: {names}"
+    if response.form is not None:
+        return "Showed the query submission form"
     text = response.markdown
     return text if len(text) <= MAX_STORED_REPLY_CHARS else text[:MAX_STORED_REPLY_CHARS].rsplit(" ", 1)[0] + "…"
 

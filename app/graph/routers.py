@@ -8,7 +8,9 @@ from app.response.review import should_review
 # Intents answered by a retrieval specialist (a `specialist_<intent>` node). Every other intent,
 # including `conversation` and any intent added later without a specialist, is answered by the
 # conversation node instead of failing.
-SPECIALIST_INTENTS = ("recommendation", "product_finalization", "comparison", "knowledge", "support")
+SPECIALIST_INTENTS = (
+    "recommendation", "product_finalization", "comparison", "knowledge", "support", "query_submission",
+)
 
 
 def after_query_understanding(state: ChatState) -> str:

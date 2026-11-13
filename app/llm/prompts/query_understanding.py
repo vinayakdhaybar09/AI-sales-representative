@@ -8,7 +8,7 @@ an Indian men's grooming brand (shaving, razors and blades, trimmers, beard care
 skin care, bath and body, fragrance, accessories). Return a structured reading of the message. \
 Do NOT answer the customer and do NOT judge whether you have enough information.
 
-intent (always one of the six values below; "out_of_scope" is NEVER an intent, it only belongs in scope):
+intent (always one of the seven values below; "out_of_scope" is NEVER an intent, it only belongs in scope):
 - recommendation: wants product suggestions ("suggest a razor", "best oil for dry beard").
 - product_finalization: the customer already has options (or asks for "the best one") and wants YOU to pick / narrow down \
 ("narrow it down to your best option", "which one should I buy?", "suggest the best one for me", "just one final pick", \
@@ -19,6 +19,11 @@ a plain request for product suggestions is recommendation, and "X vs Y" is compa
 - support: orders, tracking, shipping, returns, refunds, cancellations, payments, policies, contact, warranty, \
 and questions about how a trimmer works or is cared for (run time, battery, charging, waterproof, blades, attachments). \
 "How do I track / cancel / return / get a refund ..." is support, never knowledge.
+- query_submission: the customer wants to REPORT a problem or RAISE a query/complaint/ticket with the support team: \
+"I received a defective/damaged/wrong product", "my order is missing an item", "I want to raise a complaint", "report an issue", \
+"I want my money back because it's broken", "raise a query". Use it when they describe a problem with their own order or product \
+and want it handled. Questions about HOW a policy or process works ("what is your return policy", "how do I get a refund", \
+"how do I track my order") stay support.
 - conversation: anything that is not a request for products, comparison, grooming information or order/policy help. \
 Greetings ("hi", "hello", "good morning"), "how are you", thanks, goodbyes, "who are you" / "what can you do", bare acknowledgements \
 ("ok", "hmm", "cool") when the assistant asked nothing, and ANY message unrelated to BSC (general knowledge, weather, coding help, other brands). \

@@ -67,3 +67,21 @@ ALTER TABLE conversations ADD COLUMN IF NOT EXISTS pool_match_scores     JSONB N
 ALTER TABLE conversations ADD COLUMN IF NOT EXISTS finalized_product_ids JSONB NOT NULL DEFAULT '[]';
 ALTER TABLE conversations ADD COLUMN IF NOT EXISTS preferences           JSONB NOT NULL DEFAULT '{}';
 CREATE INDEX IF NOT EXISTS conversations_updated_at_idx ON conversations (updated_at);
+
+-- ─── support_queries ──────────────────────────────────────────────────────────
+-- Queries raised from the in-chat form (demo). Stored exactly as submitted: no
+-- re-validation, no email, no image bytes (only attachment metadata).
+-- 'ref' is derived from the id. 'idempotency_key' makes a double click harmless.
+CREATE TABLE IF NOT EXISTS support_queries (
+    id               BIGSERIAL   PRIMARY KEY,
+    ref              TEXT        GENERATED ALWAYS AS ('BSC-Q-' || (id + 1000)::text) STORED,
+    conversation_id  TEXT        NOT NULL,
+    idempotency_key  TEXT        NOT NULL UNIQUE,
+    category         TEXT        NOT NULL DEFAULT '',
+    description      TEXT        NOT NULL DEFAULT '',
+    details          JSONB       NOT NULL DEFAULT '{}',
+    attachments_meta JSONB       NOT NULL DEFAULT '[]',
+    status           TEXT        NOT NULL DEFAULT 'submitted',
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS support_queries_conversation_idx ON support_queries (conversation_id);

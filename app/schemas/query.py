@@ -10,7 +10,9 @@ from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
-Intent = Literal["recommendation", "product_finalization", "comparison", "knowledge", "support", "conversation"]
+Intent = Literal[
+    "recommendation", "product_finalization", "comparison", "knowledge", "support", "query_submission", "conversation"
+]
 Scope = Literal["in_scope", "out_of_scope"]
 
 
@@ -62,7 +64,8 @@ class QueryUnderstanding(BaseModel):
 
     intent: Intent = Field(
         description="recommendation=wants product suggestions; comparison=compare products; "
-        "knowledge=grooming/usage/how-to information; support=orders, shipping, returns, policies, contact."
+        "knowledge=grooming/usage/how-to information; support=orders, shipping, returns, policies, contact; "
+        "query_submission=wants to report a problem or raise a query/complaint with the support team."
     )
     scope: Scope = Field(description="out_of_scope if the message is unrelated to Bombay Shaving Company.")
     entities: Entities = Field(default_factory=Entities)

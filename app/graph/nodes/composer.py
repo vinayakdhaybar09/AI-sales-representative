@@ -6,6 +6,7 @@ from app.llm.models import get_chat_model
 from app.llm.prompts.composer import build_messages
 from app.llm.retry import ainvoke_with_retry
 from app.response.empty_replies import empty_reply
+from app.response.forms import query_form_reply
 from app.graph.nodes.fallback import build_fallback
 from app.response.fallbacks import SERVICE, SPECIALIST_ERROR
 from app.response.comparison_table import build_comparison_table
@@ -33,6 +34,15 @@ async def composer(state: ChatState) -> dict:
     if result.status == "error":
         logger.warning("Composer: specialist error, fallback (conversation_id=%s)", cid)
         return {"response": build_fallback(state, SPECIALIST_ERROR), "valid": True}
+
+    if result.specialist == "query_submission":
+        # The form is fixed (no LLM). The validator still checks that the reply carries it.
+        logger.info("Composer: query form, fixed reply (conversation_id=%s)", cid)
+        return {
+            "response": query_form_reply(result, state["message"]),
+            "composer_attempts": state.get("composer_attempts", 0) + 1,
+            "valid": False,
+        }
 
     # The reviewer may have found products that do not address the request: compose without them.
     excluded = state.get("excluded_item_ids") or []

@@ -130,3 +130,7 @@ The envelope's `response` = `type, markdown, product_tray, comparison_table, sug
 
 ## Embedding record (single `embeddings` table)
 `source_type` (`product|blog|support`), `source_id`, `content`, `metadata` (jsonb), `embedding` vector(1024).
+
+## Query submission (in-chat form, demo)
+- Intent `query_submission` → specialist `query_submission` returns `data: {form_id, prefill}` only. The composer takes a fixed path (no LLM): `app/response/forms.py` builds the reply, `type: "query_submission"`, with `form` (`FormSpec`: fields with `show_if`, `required_unless`, `require_one_of`, `prefill`). The validator only checks that the reply carries the form.
+- Submit is a command, not a chat turn: `POST /api/queries` `{conversation_id, idempotency_key, category, description, details{}, attachments[{name,size,type}]}` → `{success, ref}`. Stored as typed in `support_queries` (no content re-validation, no email, no image bytes: attachments are metadata only). The same `idempotency_key` returns the same `ref`.

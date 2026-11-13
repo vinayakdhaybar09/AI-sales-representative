@@ -2,7 +2,7 @@
 
 START -> session_loader -> query_understanding -> conversation | sufficiency
 sufficiency -> clarification | specialist_<intent> -> composer
-(intents: recommendation, product_finalization, comparison, knowledge, support)
+(intents: recommendation, product_finalization, comparison, knowledge, support, query_submission)
 specialist -> composer -> (validator | finalize); validator -> reviewer | composer (retry once) | fallback
 reviewer -> finalize | composer (the single revision; shared with the validator retry)
 conversation / clarification / fallback -> finalize -> END
@@ -25,6 +25,7 @@ from app.graph.nodes.specialists import (
     specialist_comparison,
     specialist_knowledge,
     specialist_product_finalization,
+    specialist_query_submission,
     specialist_recommendation,
     specialist_support,
 )
@@ -38,6 +39,7 @@ SPECIALISTS = {
     "specialist_comparison": specialist_comparison,
     "specialist_knowledge": specialist_knowledge,
     "specialist_support": specialist_support,
+    "specialist_query_submission": specialist_query_submission,
 }
 
 

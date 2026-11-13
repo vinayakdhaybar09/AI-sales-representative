@@ -7,6 +7,7 @@ ResponseType = Literal[
     "comparison",
     "knowledge",
     "support",
+    "query_submission",
     "clarification",
     "conversation",
     "fallback",
@@ -56,6 +57,39 @@ class ComparisonTable(BaseModel):
     rows: list[ComparisonRow]
 
 
+class FormOption(BaseModel):
+    value: str
+    label: str
+
+
+class FormField(BaseModel):
+    """One field of an in-chat form. The frontend has one generic renderer for these."""
+
+    key: str
+    label: str
+    type: Literal["text", "textarea", "select", "radio", "date", "number", "checkbox", "images"]
+    placeholder: str | None = None
+    hint: str | None = None
+    options: list[FormOption] = Field(default_factory=list)
+    required: bool = False
+    required_unless: str | None = None                 # key of a checkbox that waives "required"
+    show_if: dict[str, list[str]] | None = None        # {field key: [values]}; shown only when it matches
+    max_files: int | None = None                       # images only
+    max_mb: int | None = None                          # images only
+
+
+class FormSpec(BaseModel):
+    """An interactive form shown inside the chat (type "query_submission")."""
+
+    form_id: str
+    spec_version: int = 1
+    title: str
+    submit_label: str
+    fields: list[FormField]
+    require_one_of: list[list[str]] = Field(default_factory=list)   # at least one key of each group must be filled
+    prefill: dict[str, str] = Field(default_factory=dict)
+
+
 class ChatResponseBody(BaseModel):
     """The 'response' part of the envelope."""
 
@@ -64,6 +98,7 @@ class ChatResponseBody(BaseModel):
     product_tray: list[ProductCard] = Field(default_factory=list)
     comparison_table: ComparisonTable | None = None   # only for type "comparison"; its tray stays empty
     suggested_prompts: list[str] = Field(default_factory=list)
+    form: FormSpec | None = None                      # only for type "query_submission"
 
 class ErrorInfo(BaseModel):
     code: str

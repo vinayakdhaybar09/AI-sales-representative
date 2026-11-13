@@ -11,7 +11,7 @@ from app.db.connection import get_pool
 from app.graph.state import ChatState
 from app.schemas.specialist import SpecialistOutput
 from app.graph.preferences import apply_to_query
-from app.specialists import comparison, finalization, knowledge, recommendation, support
+from app.specialists import comparison, finalization, knowledge, query_submission, recommendation, support
 
 logger = logging.getLogger(__name__)
 
@@ -55,4 +55,7 @@ specialist_knowledge = _node(
 )
 specialist_support = _node(
     "support", lambda conn, s: support.run(conn, s["query"], s["search_text"])
+)
+specialist_query_submission = _node(
+    "query_submission", lambda conn, s: query_submission.run(s["query"], s["message"])
 )

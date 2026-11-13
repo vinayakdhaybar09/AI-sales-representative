@@ -13,6 +13,7 @@ import json
 import re
 from dataclasses import dataclass, field
 
+from app.response.forms import check_form_reply
 from app.response.tray import TRAY_SPECIALISTS, card_extras, featured_extras
 from app.schemas.chat import ChatResponseBody
 from app.schemas.specialist import MAX_COMPARED_PRODUCTS as MAX_PRODUCTS, SpecialistOutput
@@ -135,6 +136,9 @@ def validate(
     request_text: str = "",
 ) -> ValidationResult:
     out = ValidationResult()
+    if result.specialist == "query_submission":
+        out.critical += check_form_reply(response, result)   # fixed text + form: no claims to ground
+        return out
     md = response.markdown or ""
     low = md.lower()
     data_text = json.dumps(result.data, ensure_ascii=False) + json.dumps(result.sources, ensure_ascii=False)
