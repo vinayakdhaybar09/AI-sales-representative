@@ -85,3 +85,48 @@ CREATE TABLE IF NOT EXISTS support_queries (
     created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS support_queries_conversation_idx ON support_queries (conversation_id);
+
+-- ─── salesperson agent (app/agent) ───────────────────────────────────────────
+-- One row per chat: compact transcript (user text + assistant text only), the
+-- customer profile the agent builds up, and the product ids already shown.
+CREATE TABLE IF NOT EXISTS chat_sessions (
+    conversation_id TEXT        PRIMARY KEY,
+    messages        JSONB       NOT NULL DEFAULT '[]',
+    profile         JSONB       NOT NULL DEFAULT '{}',
+    shown_ids       JSONB       NOT NULL DEFAULT '[]',
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- One row per customer message: what was asked, which tools ran, what was shown,
+-- how fast, and whether anything went wrong. Feeds the admin analytics view.
+CREATE TABLE IF NOT EXISTS turn_logs (
+    id               BIGSERIAL   PRIMARY KEY,
+    conversation_id  TEXT        NOT NULL,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+    user_message     TEXT        NOT NULL,
+    reply            TEXT        NOT NULL DEFAULT '',
+    intent           TEXT        NOT NULL DEFAULT 'other',
+    tools            JSONB       NOT NULL DEFAULT '[]',   -- [{name, args, ms, result_count}]
+    products_shown   JSONB       NOT NULL DEFAULT '[]',
+    unmet_queries    JSONB       NOT NULL DEFAULT '[]',   -- searches that found nothing useful
+    guard_issues     JSONB       NOT NULL DEFAULT '[]',
+    handoff          BOOLEAN     NOT NULL DEFAULT false,
+    model            TEXT,
+    first_token_ms   INTEGER,
+    total_ms         INTEGER,
+    tokens           INTEGER,
+    error            TEXT
+);
+CREATE INDEX IF NOT EXISTS turn_logs_created_idx ON turn_logs (created_at);
+CREATE INDEX IF NOT EXISTS turn_logs_conv_idx ON turn_logs (conversation_id);
+
+-- Clicks, add-to-cart, chips: sent by the frontend (POST /api/events).
+CREATE TABLE IF NOT EXISTS chat_events (
+    id              BIGSERIAL   PRIMARY KEY,
+    conversation_id TEXT        NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    event_type      TEXT        NOT NULL,   -- product_click | add_to_cart | chip_click | checkout
+    product_id      TEXT,
+    meta            JSONB       NOT NULL DEFAULT '{}'
+);
+CREATE INDEX IF NOT EXISTS chat_events_created_idx ON chat_events (created_at);

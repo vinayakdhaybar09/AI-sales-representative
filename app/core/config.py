@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     mistral_api_key: SecretStr | None = None
     huggingface_api_key: SecretStr | None = None
     database_url: SecretStr | None = None
+    groq_api_key: SecretStr | None = None
 
     # Models
     chat_model: str = "mistral-small-latest"
@@ -33,6 +34,13 @@ class Settings(BaseSettings):
     reviewer_timeout_seconds: float = 15
     composer_temperature: float = 0.3         # a little variety in wording; extraction and review stay at 0
     conversation_timeout_seconds: float = 15   # greeting / off-topic reply (falls back to fixed lines)
+
+    # Salesperson agent (app/agent). Free Groq models first, Mistral (CHAT_MODEL) last.
+    # Comma-separated, tried in order; a model that is rate limited is skipped for a while.
+    agent_models: str = "openai/gpt-oss-120b,qwen/qwen3.8-27b,openai/gpt-oss-20b"
+    agent_max_rounds: int = 4                  # tool-calling rounds per message
+    agent_history_messages: int = 10           # past messages sent to the model
+    session_ttl_minutes: float = 360           # idle time before a chat session is forgotten
 
 @lru_cache
 def get_settings() -> Settings:

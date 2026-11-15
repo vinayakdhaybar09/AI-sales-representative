@@ -90,6 +90,20 @@ class FormSpec(BaseModel):
     prefill: dict[str, str] = Field(default_factory=dict)
 
 
+class BundleStep(BaseModel):
+    label: str                    # e.g. "Cleanse", "Shave", "Moisturise"
+    product_id: str
+
+
+class Bundle(BaseModel):
+    """A routine / combo: its products are in product_tray; the total is computed in Python."""
+
+    title: str
+    steps: list[BundleStep]
+    total: float
+    cart_url: str | None = None   # real store cart link (variant ids from the catalog)
+
+
 class ChatResponseBody(BaseModel):
     """The 'response' part of the envelope."""
 
@@ -99,6 +113,7 @@ class ChatResponseBody(BaseModel):
     comparison_table: ComparisonTable | None = None   # only for type "comparison"; its tray stays empty
     suggested_prompts: list[str] = Field(default_factory=list)
     form: FormSpec | None = None                      # only for type "query_submission"
+    bundle: Bundle | None = None                      # routine / combo with a total and a store cart link
 
 class ErrorInfo(BaseModel):
     code: str

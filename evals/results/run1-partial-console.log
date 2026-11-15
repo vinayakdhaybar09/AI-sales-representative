@@ -1,0 +1,217 @@
+[1/61] vague_shaving
+    FAIL  'need something for shaving' ['2 cards shown, expected 0-1']
+    PASS  'razor. my skin gets red after' 
+[2/61] vague_gift
+    PASS  'I want to gift something' 
+    PASS  'for my brother, around 1000' 
+[3/61] vague_beard
+    PASS  'beard ke liye kuch' 
+    PASS  'patchy hai, grow karna hai' 
+[4/61] vague_skin
+    PASS  'my face feels oily and dull' 
+    PASS  'under 500' 
+[5/61] vague_hello
+    PASS  'hi' 
+    PASS  'what can you help me with?' 
+[6/61] vague_best
+    PASS  "what's your best product?" 
+[7/61] razor_bumps
+    PASS  'I get razor bumps every time I shave, what should I do?' 
+    PASS  'which product would help?' 
+[8/61] sensitive_skin
+    PASS  'I have sensitive skin. Which razor and foam should I use?' 
+    PASS  'is it ok for daily use?' 
+[9/61] patchy_beard
+    PASS  'how do I fix a patchy beard?' 
+    PASS  'do you have something to make it grow faster?' 
+[10/61] dandruff_medical
+    PASS  'I have severe dandruff and my scalp is bleeding, which shamp' 
+[11/61] acne_medical
+    PASS  'I have painful cystic acne. Can your face wash treat it?' 
+[12/61] trimmer_budget
+    PASS  'I need a beard trimmer under 1500' 
+    PASS  'is it waterproof?' 
+[13/61] trimmer_body
+    PASS  'best trimmer for both beard and body, budget 2500' 
+    PASS  'and something cheaper?' 
+[14/61] trimmer_first
+    PASS  'first time buying a trimmer, no idea what to look for' 
+    PASS  'mostly beard shaping' 
+[15/61] trimmer_shower
+    PASS  'which of your trimmers can I use in the shower?' 
+[16/61] compare_two
+    FAIL  'Compare the Power Styler Beard Trimmer and the Pro Beard Tri' ["type recommendation not in ['comparison']", 'expected a comparison table']
+    PASS  'which one should I get for a patchy beard?' 
+[17/61] compare_vague
+    PASS  'legend365 vs omniblade?' 
+    PASS  'which is better for me?' 
+[18/61] compare_other_one
+    PASS  'suggest a beard trimmer under 1000' 
+    PASS  'what about the other one?' 
+[19/61] routine_beard
+    FAIL  'build me a beard care routine under 1500' ['expected a routine/bundle card']
+[20/61] routine_shave
+    FAIL  'complete shaving routine for sensitive skin, max 800' ['fallback / apology reply on an in-scope message', '0 cards shown, expected 2-6', 'expected a routine/bundle card']
+    PASS  'remove the aftershave' 
+[21/61] routine_skin
+    PASS  'simple morning skincare routine for oily skin under 700' 
+[22/61] gift_brother
+    PASS  "gift for my brother's birthday, around 1000" 
+    FAIL  "actually it's for my dad" ['0 cards shown, expected 1-3']
+[23/61] gift_partner
+    PASS  'need a gift for my girlfriend, she likes perfumes, budget 15' 
+[24/61] gift_corporate
+    PASS  'do you do corporate gifting for 50 employees?' 
+[25/61] gift_cheap
+    PASS  'something nice under 500 for a colleague' 
+[26/61] fragrance_office
+    PASS  'fresh perfume for office use, not too strong' 
+    PASS  'cheaper options?' 
+[27/61] fragrance_date
+    PASS  'date night fragrance for men, budget 1500' 
+[28/61] fragrance_discover
+    FAIL  "I don't know which scent I like, can I try small sizes first" ["none of ['kit|discovery|sample|small|10ml|20ml|set|try'] found"]
+[29/61] deals_now
+    PASS  'what deals are on right now?' 
+[30/61] deals_coupon
+    PASS  'give me a coupon code for 50% off' 
+[31/61] deals_shipping
+    PASS  'my cart is 350 rupees, do I pay shipping?' 
+[32/61] qa_how_to
+    PASS  'how do I use the Sensi hair removal spray?' 
+[33/61] qa_ingredients
+    PASS  'what are the ingredients in your Cool Detox face wash?' 
+[34/61] qa_missing
+    FAIL  'what is the exact battery capacity in mAh of the Full Body T' ['none of ["don\'t have|not (listed|available|mentioned|specified)|can\'t|no (data|detail)|unknown|support"] found']
+[35/61] qa_followup
+    PASS  'tell me about the Full Body Trimmer' 
+    PASS  'how much is it and is it in stock?' 
+[36/61] policy_shipping
+    FAIL  'how long does delivery take?' ['forbidden /your order/ present']
+[37/61] policy_return
+    PASS  "can I return a razor I don't like?" 
+[38/61] policy_track
+    PASS  'where is my order? I ordered 3 days ago' 
+[39/61] support_damaged
+    PASS  'I received a damaged trimmer, this is unacceptable!' 
+[40/61] support_wrong_item
+    PASS  'they sent me the wrong perfume' 
+    PASS  'how long do I have to report this?' 
+[41/61] support_refund
+    PASS  'when will I get my refund?' 
+[42/61] policy_cancel
+    FAIL  'I want to cancel my order' ["none of ['packed|shipped|care@|24|cancel'] found"]
+[43/61] hi_trimmer
+    PASS  'bhai beard trimmer chahiye, 1500 tak, shower mein bhi use ka' 
+[44/61] hi_razor
+    PASS  'shaving ke baad jalan hoti hai, kya karu?' 
+    FAIL  'koi product batao' ['0 cards shown, expected 1-2']
+[45/61] hi_perfume
+    PASS  'mujhe office ke liye ek fresh perfume chahiye' 
+[46/61] hi_devanagari
+    PASS  'मुझे दाढ़ी के लिए ट्रिमर चाहिए' 
+[47/61] hi_policy
+    PASS  'delivery kitne din mein hoti hai?' 
+[48/61] ctx_budget_kept
+    PASS  'looking for a face wash for oily skin' 
+    PASS  'my budget is 300' 
+    PASS  'what about for my dad instead?' 
+[49/61] ctx_dont_reask
+    PASS  'I have dry sensitive skin and want a shaving foam' 
+    PASS  'and an aftershave?' 
+[50/61] ctx_topic_switch
+    PASS  'recommend a trimmer under 2000' 
+    PASS  'never mind. how do I track my order?' 
+[51/61] ctx_pronoun
+    PASS  'show me a good beard oil' 
+    PASS  'how do I use it?' 
+[52/61] ctx_cheaper
+    PASS  'best shaving razor you have' 
+    PASS  'something cheaper please' 
+    PASS  'ok add that to my routine with a foam' 
+[53/61] women_razor
+Traceback (most recent call last):
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpx/_transports/default.py", line 250, in handle_request
+    resp = self._pool.handle_request(req)
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpcore/_sync/connection_pool.py", line 256, in handle_request
+    raise exc from None
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpcore/_sync/connection_pool.py", line 236, in handle_request
+    response = connection.handle_request(
+        pool_request.request
+    )
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpcore/_sync/connection.py", line 101, in handle_request
+    raise exc
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpcore/_sync/connection.py", line 78, in handle_request
+    stream = self._connect(request)
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpcore/_sync/connection.py", line 124, in _connect
+    stream = self._network_backend.connect_tcp(**kwargs)
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpcore/_backends/sync.py", line 207, in connect_tcp
+    with map_exceptions(exc_map):
+         ~~~~~~~~~~~~~~^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpcore/_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ConnectError: [Errno 61] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/evals/run_evals.py", line 185, in <module>
+    main()
+    ~~~~^^
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/evals/run_evals.py", line 120, in main
+    body = ask(conv, message, verbose=False)
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/evals/chat_cli.py", line 17, in ask
+    with httpx.stream("POST", f"{BASE}/api/chat/stream", json={"message": message, "conversation_id": conv}, timeout=120) as r:
+         ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpx/_api.py", line 159, in stream
+    with client.stream(
+         ~~~~~~~~~~~~~^
+        method=method,
+        ^^^^^^^^^^^^^^
+    ...<8 lines>...
+        follow_redirects=follow_redirects,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as response:
+    ^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpx/_client.py", line 868, in stream
+    response = self.send(
+        request=request,
+    ...<2 lines>...
+        stream=True,
+    )
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+        request,
+    ...<2 lines>...
+        history=[],
+    )
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+        request,
+        follow_redirects=follow_redirects,
+        history=history,
+    )
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpx/_transports/default.py", line 249, in handle_request
+    with map_httpcore_exceptions():
+         ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/vinayakdhaybar/Desktop/projects/BSC-RAG/bsc-backend/.venv/lib/python3.13/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ConnectError: [Errno 61] Connection refused
