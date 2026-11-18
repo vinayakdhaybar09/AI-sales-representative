@@ -3,11 +3,13 @@
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Path
+from typing import Literal
+
+from fastapi import APIRouter, Path, Query
 from pydantic import BaseModel, Field
 
 from app.agent import sessions
-from app.agent.tools import PROFILE_KEYS, cart_url
+from app.agent.tools import PROFILE_KEYS, card, cart_url
 from app.core.config import get_settings
 from app.db.connection import get_pool
 from app.db.repositories.products import get_product_by_id
@@ -81,3 +83,48 @@ async def forget_profile_key(
         if profile.pop(key, None) is not None:
             await sessions.save_session(conn, conversation_id, sess.get("messages") or [], profile, sess.get("shown_ids") or [])
     return {"success": True, "profile": {k: v for k, v in profile.items() if k in PROFILE_KEYS}}
+
+
+@router.get("/categories")
+async def list_categories() -> dict:
+    """Product categories with counts and a representative photo (the top-rated in-stock product), biggest first, for the Shop sheet. Pure database read (no model call)."""
+    async with get_pool().connection() as conn:
+        cur = await conn.execute(
+            """
+            SELECT p.category, count(*) AS total, count(*) FILTER (WHERE p.availability = 'in_stock') AS in_stock,
+                   (SELECT q.image_url FROM products q
+                     WHERE q.category = p.category AND q.availability = 'in_stock' AND q.image_url <> ''
+                     ORDER BY (q.rating * q.review_count / (q.review_count + 10.0)) DESC, q.review_count DESC LIMIT 1) AS image_url
+            FROM products p GROUP BY p.category ORDER BY total DESC, p.category
+            """
+        )
+        rows = await cur.fetchall()
+    return {"success": True, "categories": [{"name": r[0], "total": r[1], "in_stock": r[2], "image_url": r[3] or ""} for r in rows if r[0]]}
+
+
+_SORTS = {
+    # review-weighted rating: a 5.0 from two reviews must not beat 4.7 from 600
+    "top_rated": "(rating * review_count / (review_count + 10.0)) DESC, review_count DESC",
+    "price_asc": "price ASC",
+    "price_desc": "price DESC",
+}
+
+
+@router.get("/products")
+async def list_products(
+    category: str = Query(..., min_length=1, max_length=60),
+    sort: Literal["top_rated", "price_asc", "price_desc"] = "top_rated",
+    in_stock: bool = False,
+    limit: int = Query(60, ge=1, le=100),
+) -> dict:
+    """Product cards for one category, for the browse carousel. In-stock products always come before out-of-stock ones."""
+    where = "category = %s" + (" AND availability = 'in_stock'" if in_stock else "")
+    async with get_pool().connection() as conn:
+        cur = await conn.execute(
+            f"SELECT * FROM products WHERE {where} "
+            f"ORDER BY (availability = 'in_stock') DESC, {_SORTS[sort]} LIMIT %s",
+            (category, limit),
+        )
+        cols = [d.name for d in cur.description]
+        rows = [dict(zip(cols, r)) for r in await cur.fetchall()]
+    return {"success": True, "category": category, "products": [card(r).model_dump(mode="json") for r in rows]}
