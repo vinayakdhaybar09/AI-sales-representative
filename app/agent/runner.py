@@ -25,6 +25,7 @@ from app.agent import guard, retrieval, sessions
 from app.agent.budget import parse_budget
 from app.agent.llm_client import LLMUnavailableError, stream_chat
 from app.agent.prompt import build_system_prompt, detect_language
+from app.agent.profile_extract import extract_profile
 from app.agent.tools import (TOOL_SCHEMAS, TurnContext, apply_profile_updates, build_cards, run_tool, support_form,
                              summarize)
 from app.core.config import get_settings
@@ -318,7 +319,8 @@ async def run_turn(conversation_id: str, message: str) -> AsyncIterator[dict[str
                                 suggested_prompts=chips, form=form, bundle=bundle)
 
         # ── persist ──
-        profile = apply_profile_updates(sess["profile"], ctx.profile_updates)
+        # Facts the model saved itself win; the pattern reader only fills in what it skipped.
+        profile = apply_profile_updates(sess["profile"], {**extract_profile(message), **ctx.profile_updates})
         new_msgs = [*sess["messages"], {"role": "user", "content": message},
                     {"role": "assistant", "content": reply}]
         shown = [*sess["shown_ids"], *[i for i in ctx.shown_ids if i not in sess["shown_ids"]]][-12:]
