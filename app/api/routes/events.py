@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api", tags=["events"])
 
 class EventIn(BaseModel):
     conversation_id: str = Field(..., max_length=100)
-    event_type: Literal["product_click", "add_to_cart", "chip_click", "checkout", "bundle_add_all"]
+    event_type: Literal["product_click", "add_to_cart", "chip_click", "checkout", "bundle_add_all", "feedback"]
     product_id: str | None = Field(None, max_length=40)
     meta: dict = Field(default_factory=dict)
 

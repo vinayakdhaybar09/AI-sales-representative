@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS chat_events (
     id              BIGSERIAL   PRIMARY KEY,
     conversation_id TEXT        NOT NULL,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    event_type      TEXT        NOT NULL,   -- product_click | add_to_cart | chip_click | checkout
+    event_type      TEXT        NOT NULL,   -- product_click | add_to_cart | chip_click | checkout | bundle_add_all | feedback
     product_id      TEXT,
     meta            JSONB       NOT NULL DEFAULT '{}'
 );
